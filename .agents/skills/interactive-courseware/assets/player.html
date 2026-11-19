@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>课件</title>
+<style>
+  /* ============================================================
+     课件播放器外壳
+     页面占满整屏，只在底部留一条细栏负责翻页。
+     这份文件是固定的：只改下面脚本里的 DECK，其余不要动。
+     ============================================================ */
+  :root { --bg: #000; --ink: #fff; --accent: #FFD23F; --bar: clamp(44px, 5vh, 60px); }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--ink);
+    font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+  .player { position: fixed; inset: 0; display: grid; grid-template-rows: minmax(0, 1fr) var(--bar); }
+  /* ---------- 画面 ---------- */
+  .screen { position: relative; min-height: 0; }
+  .screen iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity .28s ease; }
+  .screen iframe.on { opacity: 1; }
+  /* ---------- 底栏：‹  进度  05/12  目录  声音  全屏  › ---------- */
+  .bar { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto auto auto; align-items: center;
+    gap: 2px; padding: 0 max(8px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(8px, env(safe-area-inset-left)); }
+  .ico { width: var(--bar); height: var(--bar); display: grid; place-items: center; border-radius: 50%;
+    color: color-mix(in srgb, var(--ink) 55%, transparent); transition: color .15s, transform .12s, opacity .2s; }
+  .ico svg { width: 42%; height: 42%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ico:hover { color: var(--accent); }
+  .ico:active { transform: scale(.88); }
+  .ico[disabled] { opacity: .18; pointer-events: none; }
+  .ico.turn svg { width: 50%; height: 50%; stroke-width: 2.2; }
+  .ico.turn.next { color: var(--accent); }
+  .ico .off { display: none; }
+  .ico.muted .on { display: none; }
+  .ico.muted .off { display: inline; }
+  /* 进度：一页一段，当前页是强调色 */
+  .track { position: relative; display: flex; gap: 4px; height: 100%; align-items: center; padding: 0 10px; min-width: 0; }
+  .seg { flex: 1 1 0; min-width: 4px; height: 100%; display: grid; align-items: center; }
+  .seg i { display: block; height: 3px; border-radius: 2px; background: color-mix(in srgb, var(--ink) 16%, transparent); transition: background .25s, height .2s, box-shadow .25s; }
+  .seg.done i { background: color-mix(in srgb, var(--ink) 46%, transparent); }
+  .seg.on i { height: 5px; background: var(--accent); box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 55%, transparent); }
+  .seg:hover i { height: 7px; background: color-mix(in srgb, var(--ink) 80%, transparent); }
+  .seg.on:hover i { background: var(--accent); }
+  .tip { position: absolute; bottom: calc(100% - 4px); transform: translateX(-50%); pointer-events: none; white-space: nowrap;
+    padding: 6px 12px; border-radius: 8px; font-size: 13px; line-height: 1.2; font-weight: 600;
+    background: var(--ink); color: var(--bg); opacity: 0; transition: opacity .12s; }
+  .tip b { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; margin-right: .6em; opacity: .55; }
+  .tip.show { opacity: 1; }
+  .count { height: var(--bar); padding: 0 12px; border-radius: 10px; white-space: nowrap;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: clamp(13px, 1.5vh, 17px); font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--ink) 45%, transparent); transition: color .15s; }
+  .count b { color: var(--ink); font-weight: 700; }
+  .count:hover { color: var(--accent); }
+  /* 页面加载中：底栏顶边一条流动的细线 */
+  .loading { position: absolute; left: 0; right: 0; top: 0; height: 2px; overflow: hidden; opacity: 0; transition: opacity .2s; }
+  .loading.show { opacity: 1; }
+  .loading::after { content: ""; position: absolute; top: 0; bottom: 0; width: 30%; background: var(--accent); animation: slide 1s ease-in-out infinite; }
+  @keyframes slide { from { left: -30%; } to { left: 100%; } }
+  /* ---------- 目录：从底栏上方升起 ---------- */
+  .toc { position: absolute; left: 0; right: 0; bottom: var(--bar); max-height: min(78%, 640px); overflow-y: auto; z-index: 5;
+    padding: clamp(18px, 3vh, 36px) clamp(16px, 5vw, 80px) clamp(14px, 2vh, 24px);
+    background: color-mix(in srgb, var(--bg) 90%, var(--ink)); border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+    transform: translateY(12px); opacity: 0; pointer-events: none; transition: transform .22s ease, opacity .22s ease; }
+  .toc.open { transform: none; opacity: 1; pointer-events: auto; }
+  .toc h2 { margin: 0 0 clamp(12px, 2vh, 22px); font-size: clamp(16px, 2.2vh, 24px); font-weight: 700; letter-spacing: .02em; }
+  .toc ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+  .toc li button { width: 100%; min-height: 52px; display: grid; grid-template-columns: 2.6em 1fr; align-items: center; gap: 4px; text-align: left;
+    padding: 8px 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); transition: border-color .15s, background .15s; }
+  .toc li button:hover { border-color: color-mix(in srgb, var(--ink) 45%, transparent); }
+  .toc li button b { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-weight: 400; color: color-mix(in srgb, var(--ink) 40%, transparent); }
+  .toc li button span { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .toc li.on button { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .toc li.on button b { color: var(--accent); }
+  .veil { position: absolute; inset: 0 0 var(--bar) 0; z-index: 4; background: color-mix(in srgb, var(--bg) 55%, transparent); opacity: 0; pointer-events: none; transition: opacity .22s; }
+  .veil.open { opacity: 1; pointer-events: auto; }
+  @media (max-width: 640px) { #full, #menu { display: none; } .track { gap: 3px; padding: 0 4px; } }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 1ms !important; animation-duration: 1ms !important; } }
+</style>
+</head>
+<body>
+<div class="player">
+  <main class="screen" id="screen"></main>
+  <div class="veil" id="veil"></div>
+  <aside class="toc" id="toc" aria-label="目录"><h2 id="tocTitle"></h2><ol id="tocList"></ol></aside>
+  <footer class="bar">
+    <div class="loading" id="loading"></div>
+    <button class="ico turn" id="prev" aria-label="上一页"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="track" id="track"><div class="tip" id="tip"></div></div>
+    <button class="count" id="count" aria-label="打开目录"></button>
+    <button class="ico" id="menu" aria-label="目录"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
+    <button class="ico" id="mute" aria-label="声音开关"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path class="on" d="M15.5 8.5a5 5 0 010 7M19 5a10 10 0 010 14"/><path class="off" d="M22 9l-6 6M16 9l6 6"/></svg></button>
+    <button class="ico" id="full" aria-label="全屏"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg></button>
+    <button class="ico turn next" id="next" aria-label="下一页"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M9 5l7 7-7 7"/></svg></button>
+  </footer>
+</div>
+<script>
+/* ============================================================
+   只改这里：课程标题、三个颜色、页面清单。
+   打包成单个文件后，src 会被替换成各页的完整 HTML。
+   ============================================================ */
+const DECK = {
+  title: "课程标题",
+  bg: "#000000",        // 页面底色（和各页的底色保持一致）
+  ink: "#FFFFFF",       // 文字色
+  accent: "#FFD23F",    // 强调色
+  pages: [
+    { title: "封面", src: "page-01.html" },
+    { title: "第二页的标题", src: "page-02.html" }
+  ]
+};
+/* ============================================================
+   以下是播放器的固定逻辑，不要修改
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const root = document.documentElement, N = DECK.pages.length, pad = n => String(n).padStart(2, '0');
+root.style.setProperty('--bg', DECK.bg); root.style.setProperty('--ink', DECK.ink); root.style.setProperty('--accent', DECK.accent);
+document.title = DECK.title; $('tocTitle').textContent = DECK.title;
+let cur = -1, frame = null, loadTimer = 0, muted = false;
+try { muted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+function tellMute() { $('mute').classList.toggle('muted', muted); try { frame.contentWindow.postMessage({ deck: 'mute', muted: muted }, '*'); } catch (e) {} }
+const segs = DECK.pages.map((p, i) => {
+  const b = document.createElement('button');
+  b.className = 'seg'; b.innerHTML = '<i></i>'; b.setAttribute('aria-label', '第 ' + (i + 1) + ' 页：' + p.title);
+  b.onclick = () => show(i);
+  b.onmouseenter = () => { const t = $('tip'); t.innerHTML = '<b>' + pad(i + 1) + '</b>'; t.append(p.title); t.style.left = (b.offsetLeft + b.offsetWidth / 2) + 'px'; t.classList.add('show'); };
+  b.onmouseleave = () => $('tip').classList.remove('show');
+  $('track').appendChild(b);
+  const li = document.createElement('li'), a = document.createElement('button');
+  a.innerHTML = '<b>' + pad(i + 1) + '</b><span></span>'; a.lastChild.textContent = p.title;
+  a.onclick = () => { toc(false); show(i); };
+  li.appendChild(a); $('tocList').appendChild(li);
+  return b;
+});
+/* 同一时间只保留当前这一页：切走的页面会被卸载，它的 3D、计时器、声音随之释放 */
+function show(i) {
+  i = Math.max(0, Math.min(N - 1, i));
+  if (i === cur) return;
+  const old = frame, f = document.createElement('iframe'), page = DECK.pages[i];
+  f.title = page.title; f.allow = 'fullscreen; autoplay';
+  if (/^\s*</.test(page.src)) f.srcdoc = page.src; else f.src = page.src;
+  clearTimeout(loadTimer); loadTimer = setTimeout(() => $('loading').classList.add('show'), 180);
+  f.onload = () => {
+    clearTimeout(loadTimer); $('loading').classList.remove('show');
+    f.classList.add('on'); if (old) setTimeout(() => old.remove(), 300);
+    tellMute();
+    try { f.contentWindow.focus(); } catch (e) {}
+  };
+  $('screen').appendChild(f); frame = f; cur = i;
+  segs.forEach((s, k) => { s.classList.toggle('on', k === i); s.classList.toggle('done', k < i); });
+  [...$('tocList').children].forEach((li, k) => li.classList.toggle('on', k === i));
+  $('count').innerHTML = '<b>' + pad(i + 1) + '</b> / ' + pad(N);
+  $('prev').disabled = i === 0; $('next').disabled = i === N - 1;
+  try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+}
+const next = () => show(cur + 1), prev = () => show(cur - 1);
+function toc(open) {
+  open = open === undefined ? !$('toc').classList.contains('open') : open;
+  $('toc').classList.toggle('open', open); $('veil').classList.toggle('open', open);
+}
+function fullscreen() {
+  const d = document;
+  if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+  else (root.requestFullscreen || root.webkitRequestFullscreen || (() => {})).call(root);
+}
+$('prev').onclick = prev; $('next').onclick = next;
+$('count').onclick = () => toc(); $('menu').onclick = () => toc(); $('veil').onclick = () => toc(false);
+$('full').onclick = fullscreen;
+$('mute').onclick = () => { muted = !muted; try { localStorage.setItem('deck:muted', muted ? '1' : '0'); } catch (e) {} tellMute(); };
+/* 键盘：焦点在外壳上时直接处理；焦点在页面里时，由页面里的"翻页桥"转发过来 */
+function key(k) {
+  if (k === 'Escape') return toc(false);
+  if (k === 'g' || k === 'G') return toc();
+  if (k === 'f' || k === 'F') return fullscreen();
+  if (k === 'm' || k === 'M') return $('mute').onclick();
+  if (k === 'ArrowRight' || k === 'PageDown') next();
+  else if (k === 'ArrowLeft' || k === 'PageUp') prev();
+  else if (k === 'Home') show(0);
+  else if (k === 'End') show(N - 1);
+}
+addEventListener('keydown', e => { if (!e.ctrlKey && !e.metaKey && !e.altKey) key(e.key); });
+addEventListener('message', e => {
+  const d = e.data || {};
+  if (d.deck === 'next') next(); else if (d.deck === 'prev') prev();
+  else if (d.deck === 'go') show(d.index); else if (d.deck === 'key') key(d.key);
+});
+addEventListener('hashchange', () => show((parseInt(location.hash.slice(1), 10) || 1) - 1));
+show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+</script>
+</body>
+</html>
