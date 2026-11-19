@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>阿基米德与浮力 · 07 · 破案验金</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #F6F1E7;                      /* 底色 */
+  --surface: #FFFDF8;                 /* 卡片、面板 */
+  --surface-2: #EBE4D6;               /* 凹槽、轨道、未选中的底 */
+  --ink: #1F1B16;                     /* 主文字 */
+  --ink-2: #5A544A;                   /* 次要文字 */
+  --ink-3: #736D62;                   /* 说明文字 */
+  --line: rgba(31, 27, 22, 0.14);     /* 描边、分隔线 */
+  --accent: #C4411A;                  /* 唯一的强调色 */
+  --accent-ink: #FFFFFF;              /* 强调色上面的文字 */
+  --water: #8FA6BC;                   /* 全课唯一的附加色：水的实物色（降饱和） */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.desk { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr); gap: 1.8rem; min-height: 0; }
+.chain { display: flex; flex-direction: column; gap: 0.7rem; min-height: 0; }
+.slot { display: flex; align-items: center; justify-content: space-between; gap: 1em; min-height: 3.4em;
+  padding: 0.55em 1.1em; border: 1.5px dashed var(--line); border-radius: 0.9rem; cursor: pointer;
+  background: transparent; transition: border-color 0.2s, background 0.2s; }
+.slot.sel-target { border-color: var(--accent); }
+.slot.filled { border-style: solid; background: var(--surface); cursor: default; }
+.slot .s-label { font-weight: 700; color: var(--ink-2); }
+.slot.filled .s-label { color: var(--ink); }
+.slot .s-val { font-weight: 700; color: var(--accent); white-space: nowrap; }
+.calc { font-size: 1.25rem; font-weight: 800; text-align: center; padding: 0.9rem 1.2rem; }
+.calc b { color: var(--accent); font-size: 1.5em; }
+.scale-wrap { display: flex; flex-direction: column; gap: 0.5rem; }
+.scalebar { position: relative; height: 0.55rem; border-radius: 999px; background: var(--surface-2); margin-top: 1.6em; }
+.scalebar .tick { position: absolute; top: -1.7em; transform: translateX(-50%); font-size: 0.85rem; color: var(--ink-3); white-space: nowrap; }
+.scalebar .mark { position: absolute; top: -0.28rem; left: 0; width: 0.95rem; height: 1.1rem; border-radius: 0.25rem;
+  background: var(--accent); transition: left 1.1s cubic-bezier(0.3, 1, 0.4, 1); }
+.actions { display: flex; gap: 0.7rem; justify-content: flex-end; align-items: center; margin-top: auto; flex-wrap: wrap; }
+.evidence { display: flex; flex-direction: column; gap: 1rem; min-height: 0; }
+.crownfig { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.crownfig svg { max-height: 100%; width: auto; max-width: 100%; }
+.crownfig .seam { opacity: 0; }
+.crownfig svg.flash .seam { animation: seam 0.7s ease-in-out 3; }
+@keyframes seam { 0%, 100% { opacity: 0; } 50% { opacity: 0.95; } }
+.cards { display: flex; flex-direction: column; gap: 0.7rem; }
+.evcard { min-height: 3.4em; padding: 0.7em 1.2em; border-radius: 0.9rem; background: var(--surface);
+  border: 1.5px solid var(--line); font-weight: 700; text-align: left; cursor: grab;
+  touch-action: none; user-select: none; -webkit-user-select: none; }
+.evcard.lift { position: fixed; z-index: 60; box-shadow: 0 10px 26px color-mix(in srgb, var(--ink) 18%, transparent); pointer-events: none; }
+.evcard.sel { border-color: var(--accent); color: var(--accent); }
+.evcard.used { visibility: hidden; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">挑战 · 终局</p>
+    <h1 class="in" style="--i:1">破案：王冠验金</h1>
+  </header>
+  <main class="desk">
+    <div class="chain in" style="--i:2">
+      <h3>推理链 · 把三张证据卡放回它该在的步骤</h3>
+      <div class="slot" data-slot="0"><span class="s-label">第一步 · 空气中称重，得 G</span><span class="s-val num" id="v0"></span></div>
+      <div class="slot" data-slot="1"><span class="s-label">第二步 · 浸没水中称重，得 F示</span><span class="s-val num" id="v1"></span></div>
+      <div class="slot" data-slot="2"><span class="s-label">第三步 · 接住排开的水并称重，得 G排</span><span class="s-val num" id="v2"></span></div>
+      <div class="calc card num" id="calc" hidden>ρ冠 ＝ m ÷ V ＝ 2000 g ÷ 130 cm³ ≈ <b id="rhoNum">0</b> g/cm³</div>
+      <div class="scale-wrap" id="scaleWrap" hidden>
+        <div class="scalebar num">
+          <span class="tick" style="left: 5%">银 10.5</span>
+          <span class="tick" style="left: 93%">金 19.3</span>
+          <div class="mark" id="marker"></div>
+        </div>
+        <p class="small">王冠的密度落在哪儿？（横轴 10 → 20 g/cm³）</p>
+      </div>
+      <p class="note" id="note">三张证据卡在右边。拖到对应步骤上，或先点卡片、再点步骤。</p>
+      <div class="actions">
+        <button class="btn ghost" id="hintBtn">提示</button>
+        <button class="btn" id="verdictBtn" hidden>宣判</button>
+        <button class="btn ghost" id="againBtn" hidden>再来一次</button>
+      </div>
+    </div>
+    <div class="evidence in" style="--i:3">
+      <figure class="crownfig">
+        <svg id="crownSvg" viewBox="0 0 440 260" role="img" aria-label="受审的金冠">
+          <g stroke="var(--ink)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+            <path d="M126 182 L142 100 L196 150 L220 88 L244 150 L298 100 L314 182 Z" fill="var(--surface)"/>
+            <rect x="116" y="182" width="208" height="30" rx="9" fill="var(--surface)"/>
+            <circle cx="142" cy="92" r="8" fill="var(--accent)" stroke="none"/>
+            <circle cx="220" cy="78" r="10" fill="var(--accent)" stroke="none"/>
+            <circle cx="298" cy="92" r="8" fill="var(--accent)" stroke="none"/>
+          </g>
+          <path class="seam" d="M206 92 L220 128 L208 162 L222 210" fill="none" stroke="var(--ink-2)" stroke-width="5" stroke-linecap="round" stroke-dasharray="3 8"/>
+          <text x="220" y="244" text-anchor="middle" font-size="16" fill="var(--ink-3)">待验的王冠</text>
+        </svg>
+      </figure>
+      <div class="cards" id="cards"></div>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 王冠案卷：三张证据卡（g 取 10 N/kg；m = 2000 g，V = 130 cm³，ρ冠 ≈ 15.4 g/cm³，约三成体积是银） */
+var CARDS = [
+  { text: '空气中称 · G = 20.0 N', slot: 0, derived: 'm = G ÷ g ＝ 2.0 kg' },
+  { text: '浸没水中称 · F示 = 18.7 N', slot: 1, derived: 'F浮 ＝ 20.0 − 18.7 ＝ 1.3 N' },
+  { text: '接排开的水 · G排 = 1.3 N', slot: 2, derived: 'V排 ＝ 130 cm³' }
+];
+/* 放错位置的反馈：说清“这个读数是在哪一步、怎么来的” */
+var WRONG_NOTE = {
+  '0>1': '20.0 N 是在空气里称的——第二步还一滴水都没沾呢。',
+  '0>2': '20.0 N 是王冠本身的物重，不是接来的水的重。',
+  '1>0': '18.7 N 是浸没在水里时的读数；第一步没沾水，读数是 20.0 N。',
+  '1>2': '18.7 N 是测力计的读数；排开的水要用小杯另接、另称。',
+  '2>0': '1.3 N 不是王冠的物重——它在空气里是 20.0 N。',
+  '2>1': '1.3 N 是排开的水重，不是浸没时的测力计读数 18.7 N。'
+};
+var HINTS = [
+  '方法：先看每张卡上的读数是在什么情况下测的。',
+  '线索：第一步没沾水；第二步读数变小；第三步是接水另称。',
+  '答案：G 去第一步，F示 去第二步，G排 去第三步。'
+];
+var slots = document.querySelectorAll('.slot');
+var cardsBox = document.getElementById('cards');
+var note = document.getElementById('note');
+var calc = document.getElementById('calc');
+var rhoNum = document.getElementById('rhoNum');
+var scaleWrap = document.getElementById('scaleWrap');
+var marker = document.getElementById('marker');
+var verdictBtn = document.getElementById('verdictBtn');
+var againBtn = document.getElementById('againBtn');
+var hintBtn = document.getElementById('hintBtn');
+var crownSvg = document.getElementById('crownSvg');
+var placed = 0, mistakes = 0, hintIdx = 0, selected = null, done = false;
+function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = a[i]; a[i] = a[j]; a[j] = tmp; } return a; }
+function buildCards() {
+  cardsBox.innerHTML = '';
+  selected = null;
+  shuffle(CARDS.map(function (c, i) { return i; })).forEach(function (ci) {
+    var c = CARDS[ci];
+    var b = document.createElement('button');
+    b.className = 'evcard num';
+    b.textContent = c.text;
+    b.dataset.ci = ci;
+    cardsBox.appendChild(b);
+    wireDrag(b);
+  });
+}
+function wireDrag(el) {
+  var moved = false, startX = 0, startY = 0, home = null, dragging = false;
+  el.addEventListener('pointerdown', function (e) {
+    if (done || el.classList.contains('used')) return;
+    e.preventDefault();
+    var r = el.getBoundingClientRect();
+    home = { x: r.left, y: r.top, w: r.width };
+    startX = e.clientX; startY = e.clientY; moved = false; dragging = true;
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var dx = e.clientX - startX, dy = e.clientY - startY;
+    if (!moved && Math.abs(dx) + Math.abs(dy) > 8) {
+      moved = true;
+      el.classList.add('lift');
+      el.style.width = home.w + 'px';
+      sfx('tap');
+    }
+    if (moved) {
+      el.style.left = (e.clientX - home.w / 2) + 'px';
+      el.style.top = (e.clientY - 26) + 'px';
+    }
+  });
+  function finish(e) {
+    if (!dragging) return;
+    dragging = false;
+    if (!moved) { toggleSelect(el); return; }
+    var si = slotAt(e.clientX, e.clientY);
+    if (si === null) flyBack(el);
+    else { settleCard(el, si); }
+  }
+  el.addEventListener('pointerup', finish);
+  el.addEventListener('pointercancel', function () { if (dragging) { dragging = false; flyBack(el); } });
+}
+function flyBack(el) {
+  var r = el.getBoundingClientRect();
+  el.style.transition = 'left 0.25s ease, top 0.25s ease';
+  requestAnimationFrame(function () {
+    el.style.left = r.left + 'px';
+    el.style.top = r.top + 'px';
+    setTimeout(function () {
+      el.classList.remove('lift');
+      el.style.transition = '';
+      el.style.left = ''; el.style.top = ''; el.style.width = '';
+    }, 260);
+  });
+}
+function slotAt(x, y) {
+  for (var i = 0; i < slots.length; i++) {
+    var r = slots[i].getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom && !slots[i].classList.contains('filled')) return i;
+  }
+  return null;
+}
+function toggleSelect(el) {
+  if (selected === el) {
+    el.classList.remove('sel');
+    selected = null;
+    clearTargets();
+    return;
+  }
+  if (selected) selected.classList.remove('sel');
+  selected = el;
+  el.classList.add('sel');
+  sfx('tap');
+  slots.forEach(function (s) {
+    if (!s.classList.contains('filled')) s.classList.add('sel-target');
+  });
+}
+function clearTargets() {
+  slots.forEach(function (s) { s.classList.remove('sel-target'); });
+}
+slots.forEach(function (s) {
+  s.addEventListener('click', function () {
+    if (done) return;
+    if (s.classList.contains('filled')) return;
+    if (!selected) return;
+    var el = selected;
+    selected = null;
+    el.classList.remove('sel');
+    clearTargets();
+    settleCard(el, Number(s.dataset.slot));
+  });
+});
+function settleCard(el, si) {
+  var ci = Number(el.dataset.ci);
+  var c = CARDS[ci];
+  if (c.slot === si) {
+    var slot = slots[si];
+    slot.classList.add('filled');
+    document.getElementById('v' + si).textContent = c.derived;
+    el.classList.add('used');
+    el.classList.remove('lift');
+    el.style.cssText = '';
+    sfx('ok');
+    fx(slot, 'pop');
+    placed++;
+    if (placed === 1) note.textContent = '第一步有了：m = 2.0 kg。还差两步。';
+    if (placed === 2) note.textContent = '还剩最后一张卡。';
+    if (placed === 3) allPlaced();
+  } else {
+    mistakes++;
+    sfx('no');
+    note.textContent = WRONG_NOTE[ci + '>' + si] || '这张卡不属于这一步。想想它是在什么情况下测出来的？';
+    note.className = 'note bad';
+    flyBack(el);
+  }
+}
+function allPlaced() {
+  done = true;
+  note.textContent = '三步证据齐了。王冠的密度——算！';
+  note.className = 'note';
+  calc.hidden = false;
+  fx(calc, 'pop');
+  sfx('ok');
+  var start = 10, end = 15.4, t0 = null;
+  function step(ts) {
+    if (t0 === null) t0 = ts;
+    var k = Math.min(1, (ts - t0) / 900);
+    rhoNum.textContent = (start + (end - start) * (1 - Math.pow(1 - k, 2))).toFixed(1);
+    if (k < 1) requestAnimationFrame(step);
+    else {
+      scaleWrap.hidden = false;
+      requestAnimationFrame(function () { marker.style.left = '54%'; });
+      setTimeout(function () {
+        note.textContent = '15.4 g/cm³：比银子重，比金子轻——这王冠有鬼。宣判吧。';
+        note.classList.add('good');
+        verdictBtn.hidden = false;
+        sfx('ok');
+      }, 1200);
+    }
+  }
+  requestAnimationFrame(step);
+}
+verdictBtn.addEventListener('click', function () {
+  sfx('win');
+  crownSvg.classList.add('flash');
+  verdictBtn.hidden = true;
+  var n = mistakes === 0 ? 3 : (mistakes === 1 ? 2 : 1);
+  stars.save('07', n);
+  note.innerHTML = '国王的判词：金匠把约 <b class="hl">三成体积</b> 的金子换成了银子——证据链完整，赖不掉。<br>' +
+    '你为本案拿下 <b class="num">' + n + '</b> 颗星。';
+  againBtn.hidden = false;
+});
+againBtn.addEventListener('click', function () {
+  sfx('tap');
+  reset();
+});
+hintBtn.addEventListener('click', function () {
+  note.className = 'note';
+  note.textContent = HINTS[Math.min(hintIdx, HINTS.length - 1)];
+  hintIdx++;
+  sfx('tap');
+});
+function reset() {
+  placed = 0; mistakes = 0; hintIdx = 0; done = false;
+  note.className = 'note';
+  note.textContent = '三张证据卡在右边。拖到对应步骤上，或先点卡片、再点步骤。';
+  calc.hidden = true;
+  scaleWrap.hidden = true;
+  marker.style.left = '0%';
+  verdictBtn.hidden = true;
+  againBtn.hidden = true;
+  slots.forEach(function (s) { s.classList.remove('filled', 'sel-target'); });
+  document.getElementById('v0').textContent = '';
+  document.getElementById('v1').textContent = '';
+  document.getElementById('v2').textContent = '';
+  crownSvg.classList.remove('flash');
+  buildCards();
+}
+buildCards();
+</script>
+</body>
+</html>

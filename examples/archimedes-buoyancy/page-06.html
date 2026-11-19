@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>阿基米德与浮力 · 06 · 浮力预测家</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #F6F1E7;                      /* 底色 */
+  --surface: #FFFDF8;                 /* 卡片、面板 */
+  --surface-2: #EBE4D6;               /* 凹槽、轨道、未选中的底 */
+  --ink: #1F1B16;                     /* 主文字 */
+  --ink-2: #5A544A;                   /* 次要文字 */
+  --ink-3: #736D62;                   /* 说明文字 */
+  --line: rgba(31, 27, 22, 0.14);     /* 描边、分隔线 */
+  --accent: #C4411A;                  /* 唯一的强调色 */
+  --accent-ink: #FFFFFF;              /* 强调色上面的文字 */
+  --water: #8FA6BC;                   /* 全课唯一的附加色：水的实物色（降饱和） */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.game { display: flex; flex-direction: column; gap: 0.9rem; min-height: 0; }
+.qtext { font-size: 1.3rem; font-weight: 700; line-height: 1.5; }
+.qtext .chip { margin-right: 0.6em; transform: translateY(-0.15em); }
+.optrow { display: flex; gap: 0.9rem; }
+.optrow .btn { flex: 1; min-width: 0; }
+.optrow .btn.right { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
+.stage2 { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 1.5rem; flex: 1; min-height: 0; }
+.benchwrap { min-height: 0; display: flex; align-items: center; justify-content: center; }
+.benchwrap svg { max-height: 100%; width: auto; max-width: 100%; }
+.panel { display: flex; flex-direction: column; gap: 0.8rem; min-height: 0; }
+.reads { padding: 0.8rem 1.2rem; display: flex; flex-direction: column; }
+.rrow { display: flex; justify-content: space-between; align-items: baseline; gap: 1em; padding: 0.4rem 0; border-bottom: 1px dashed var(--line); }
+.rrow:last-child { border-bottom: 0; }
+.rrow span { font-size: 0.95rem; color: var(--ink-2); }
+.rrow b { font-size: 1.3rem; font-weight: 700; }
+.rrow b.mid { font-size: 1rem; }
+.actions { display: flex; gap: 0.7rem; justify-content: flex-end; align-items: center; margin-top: auto; flex-wrap: wrap; }
+.result { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; text-align: center; }
+.stars { display: flex; gap: 0.5rem; }
+.stars svg { width: 3rem; height: 3rem; }
+.review { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">练习 · 浮力预测家</p>
+    <h1 class="in" style="--i:1">先猜，再开闸</h1>
+  </header>
+  <main class="game">
+    <div class="qarea in" style="--i:2" id="qarea">
+      <p class="qtext" id="qtext"></p>
+      <div class="optrow" id="optrow"></div>
+    </div>
+    <div class="stage2">
+      <figure class="benchwrap in" style="--i:3">
+        <svg viewBox="0 0 720 380" role="img" aria-label="水闸实验台：闸门升起，水漫过铁块">
+          <rect x="36" y="70" width="110" height="260" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <rect x="40" y="74" width="102" height="252" fill="var(--water)" opacity="0.5"/>
+          <rect x="172" y="70" width="348" height="260" fill="none" stroke="var(--ink)" stroke-width="3"/>
+          <rect id="chamberWater" x="176" y="330" width="340" height="0" fill="var(--water)" opacity="0.5"/>
+          <rect id="saltWater" x="176" y="330" width="340" height="0" fill="var(--water)" opacity="0.35"/>
+          <line x1="176" y1="110" x2="516" y2="110" stroke="var(--ink-3)" stroke-width="2" stroke-dasharray="6 6"/>
+          <text x="524" y="114" font-size="14" fill="var(--ink-3)">全浸线</text>
+          <rect x="305" y="120" width="80" height="70" rx="6" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3"/>
+          <line x1="345" y1="54" x2="345" y2="120" stroke="var(--ink)" stroke-width="3"/>
+          <rect x="300" y="10" width="90" height="44" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <text id="scaleText" x="345" y="40" text-anchor="middle" font-size="22" font-weight="800" fill="var(--ink)" font-family="ui-monospace, Menlo, monospace">7.9</text>
+          <rect id="gate" x="146" y="70" width="26" height="260" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3"/>
+          <rect id="jet" x="148" y="150" width="22" height="110" fill="var(--water)" opacity="0"/>
+          <text id="liqText" x="196" y="102" font-size="17" fill="var(--ink-3)">清水</text>
+          <text x="96" y="352" text-anchor="middle" font-size="15" fill="var(--ink-3)">蓄水池</text>
+          <text x="345" y="352" text-anchor="middle" font-size="15" fill="var(--ink-3)">铁块 G = 7.9 N</text>
+        </svg>
+      </figure>
+      <div class="panel in" style="--i:4">
+        <div class="reads card">
+          <div class="rrow"><span>液体</span><b class="mid" id="rRho">清水 ρ = 1.0×10³ kg/m³</b></div>
+          <div class="rrow"><span>V排</span><b class="num" id="rV">0 cm³</b></div>
+          <div class="rrow"><span>浮力 F浮</span><b class="num" id="rFf">0.0 N</b></div>
+        </div>
+        <p class="small" id="hintLine"></p>
+        <p class="note" id="note">读题，先在心里给出你的预测。</p>
+        <div class="actions">
+          <button class="btn ghost" id="hintBtn">提示</button>
+          <button class="btn" id="valveBtn" hidden>开闸验证</button>
+          <button class="btn" id="nextBtn" hidden>下一关</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 题库：三关。铁块体积统一 100 cm³ = 1×10⁻⁴ m³，g 取 10 N/kg。顺序每局随机。 */
+/* pre：开局水箱水位（1 = 已全浸）；liquid：salt 的关最后会把水换成盐水再验一次 */
+var QUESTIONS = [
+  {
+    q: '铁块体积 100 cm³，全部浸没在水里。浮力是多大？',
+    options: ['0.5 N', '1 N', '10 N'], answer: 1,
+    pre: 0, liquid: 'water',
+    ok: 'F浮 ＝ ρ液 g V排 ＝ 1000 × 10 × 0.0001 ＝ 1 N。',
+    wrong: ['0.5 N 是浸入一半时的数——题目说的是「浸没」。', null, '10 N？那是把 100 cm³ 当成了 0.1 m³。记住：100 cm³ ＝ 1×10⁻⁴ m³。'],
+    hints: ['先把单位换算：100 cm³ 是多少 m³？', 'ρ液g ＝ 10000，再乘 V排。', '1×10⁻⁴ × 10000 ＝ ？']
+  },
+  {
+    q: '还是这块铁块：从「一半浸入」到「全部浸没」，浮力怎么变？',
+    options: ['变大', '变小', '不变'], answer: 0,
+    pre: 0.5, liquid: 'water',
+    ok: '浸入越深，V排 越大：浮力从 0.5 N 涨到 1.0 N。',
+    wrong: ['浮力不会越泡越小——托它的水明明更多了。', null, '「浸没后不变」说的是全浸之后；从一半到全浸，V排 在翻倍。'],
+    hints: ['盯住 V排：从一半到全部，它怎么变？', 'ρ液 和物体都没变，变的是谁？', 'V排 翻倍，浮力也翻倍。']
+  },
+  {
+    q: '这块铁块分别浸没在清水和盐水（ρ液 = 1.2×10³ kg/m³）里，哪种情况浮力大？',
+    options: ['清水', '盐水', '一样大'], answer: 1,
+    pre: 1, liquid: 'salt',
+    ok: 'V排 相同，ρ液 越大浮力越大：清水 1.0 N，盐水 1.2 N。',
+    wrong: ['清水输了：1.0 N 对 1.2 N。', null, 'V排 一样时，ρ液 才是决定项——死海里的船躺得最平。'],
+    hints: ['两次都是「浸没」，V排 一样。', '公式里还剩谁可以不同？', 'ρ液：1.0 对 1.2，谁大？']
+  }
+];
+var GEO = { BLOCK_TOP: 120, BLOCK_H: 70, FULL_Y: 110, HALF_Y: 155, EMPTY_Y: 330, G_IRON: 7.9, V_FULL: 100 };
+var order = [], idx = 0, attempts = 0, firstTry = 0, phase = 'guess';
+var waterY = GEO.EMPTY_Y, saltOn = false;
+var qarea = document.getElementById('qarea');
+var qtext = document.getElementById('qtext');
+var optrow = document.getElementById('optrow');
+var note = document.getElementById('note');
+var hintLine = document.getElementById('hintLine');
+var valveBtn = document.getElementById('valveBtn');
+var nextBtn = document.getElementById('nextBtn');
+var hintBtn = document.getElementById('hintBtn');
+var gate = document.getElementById('gate');
+var jet = document.getElementById('jet');
+var chamberWater = document.getElementById('chamberWater');
+var saltWater = document.getElementById('saltWater');
+var scaleText = document.getElementById('scaleText');
+var liqText = document.getElementById('liqText');
+var rRho = document.getElementById('rRho');
+var rV = document.getElementById('rV');
+var rFf = document.getElementById('rFf');
+function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = a[i]; a[i] = a[j]; a[j] = tmp; } return a; }
+function draw() {
+  chamberWater.setAttribute('y', waterY);
+  chamberWater.setAttribute('height', GEO.EMPTY_Y - waterY);
+  saltWater.setAttribute('y', waterY);
+  saltWater.setAttribute('height', GEO.EMPTY_Y - waterY);
+  saltWater.style.opacity = saltOn ? 1 : 0;
+  var frac = Math.max(0, Math.min(1, (waterY - GEO.BLOCK_TOP) / GEO.BLOCK_H));
+  frac = 1 - frac;
+  var rho = saltOn ? 1200 : 1000;
+  var vDisp = frac * GEO.V_FULL;
+  var Ff = rho * 10 * vDisp / 1e6;
+  rV.textContent = Math.round(vDisp) + ' cm³';
+  rFf.textContent = Ff.toFixed(1) + ' N';
+  scaleText.textContent = (GEO.G_IRON - Ff).toFixed(1);
+  return Ff;
+}
+function showQ() {
+  var q = order[idx];
+  attempts = 0; phase = 'guess'; saltOn = false;
+  waterY = q.pre === 0 ? GEO.EMPTY_Y : (q.pre === 0.5 ? GEO.HALF_Y : GEO.FULL_Y);
+  valveBtn.hidden = true; nextBtn.hidden = true; valveBtn.disabled = false;
+  liqText.textContent = '清水';
+  rRho.textContent = '清水 ρ = 1.0×10³ kg/m³';
+  hintLine.textContent = '';
+  note.textContent = '读题，先在心里给出你的预测。';
+  note.className = 'note';
+  qtext.innerHTML = '<span class="chip num">第 ' + (idx + 1) + ' 关</span>' + q.q;
+  optrow.innerHTML = '';
+  q.options.forEach(function (label, i) {
+    var b = document.createElement('button');
+    b.className = 'btn ghost';
+    b.textContent = label;
+    b.addEventListener('click', function () { choose(i, b); });
+    optrow.appendChild(b);
+  });
+  draw();
+}
+function choose(i, btn) {
+  if (phase !== 'guess') return;
+  var q = order[idx];
+  if (i === q.answer) {
+    phase = 'ready';
+    sfx('ok');
+    btn.classList.remove('ghost');
+    btn.classList.add('right');
+    fx(btn, 'pop');
+    if (attempts === 0) firstTry++;
+    note.textContent = q.ok + ' 现在，开闸验一验。';
+    note.className = 'note good';
+    valveBtn.hidden = false;
+  } else {
+    attempts++;
+    sfx('no');
+    fx(btn, 'shake');
+    btn.disabled = true;
+    note.textContent = q.wrong[i] || '这个选项不对，再想想。';
+    note.className = 'note bad';
+  }
+}
+function tweenMs(ms, step, done) {
+  var start = null;
+  function frame(ts) {
+    if (start === null) start = ts;
+    var k = Math.min(1, (ts - start) / ms);
+    step(k);
+    if (k < 1) requestAnimationFrame(frame);
+    else if (done) done();
+  }
+  requestAnimationFrame(frame);
+}
+function gateTo(open, done) {
+  var m = /translate\(0\s+(-?[\d.]+)\)/.exec(gate.getAttribute('transform') || '');
+  var fromY = m ? parseFloat(m[1]) : 0;
+  var toY = open ? -262 : 0;
+  tweenMs(340, function (k) {
+    gate.setAttribute('transform', 'translate(0 ' + (fromY + (toY - fromY) * k) + ')');
+    jet.style.opacity = open && k > 0.15 && k < 0.9 ? 0.75 : 0;
+  }, done);
+}
+function riseTo(targetY, done) {
+  var fromY = waterY;
+  if (Math.abs(fromY - targetY) < 2) { if (done) done(); return; }
+  jet.style.opacity = 0.75;
+  tweenMs(1200, function (k) {
+    var e = 1 - Math.pow(1 - k, 2);
+    waterY = fromY + (targetY - fromY) * e;
+    draw();
+    if (k >= 0.97) jet.style.opacity = 0;
+  }, function () { jet.style.opacity = 0; if (done) done(); });
+}
+function swapSalt(done) {
+  saltOn = true;
+  liqText.textContent = '盐水';
+  rRho.textContent = '盐水 ρ = 1.2×10³ kg/m³';
+  var fromF = draw();
+  tweenMs(600, function () {}, function () { draw(); if (done) done(); });
+}
+valveBtn.addEventListener('click', function () {
+  if (phase !== 'ready') return;
+  phase = 'animating';
+  sfx('tap');
+  valveBtn.disabled = true;
+  var q = order[idx];
+  var target = GEO.FULL_Y;
+  gateTo(true, function () {
+    riseTo(target, function () {
+      if (q.liquid === 'salt') {
+        swapSalt(function () {
+          gateTo(false, finishVerify);
+        });
+      } else {
+        gateTo(false, finishVerify);
+      }
+    });
+  });
+});
+function finishVerify() {
+  var q = order[idx];
+  draw();
+  note.textContent = '量到了：这一步的 F浮 ＝ ' + rFf.textContent + '。' + q.ok;
+  note.className = 'note good';
+  sfx('ok');
+  nextBtn.textContent = idx < order.length - 1 ? '下一关' : '看结算';
+  nextBtn.hidden = false;
+  phase = 'done';
+}
+nextBtn.addEventListener('click', function () {
+  sfx('tap');
+  if (idx < order.length - 1) { idx++; showQ(); }
+  else settle();
+});
+var HINT_PREFIX = ['方法 · ', '线索 · ', '差不多 · '];
+var hintIdx = 0;
+hintBtn.addEventListener('click', function () {
+  var q = order[idx];
+  var lv = Math.min(hintIdx, q.hints.length - 1);
+  hintLine.textContent = HINT_PREFIX[lv] + q.hints[lv];
+  hintIdx++;
+  sfx('tap');
+});
+function starSVG(lit) {
+  return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.9 6 6.5.7-4.9 4.4 1.4 6.4-5.9-3.4-5.9 3.4 1.4-6.4L2.6 9.3l6.5-.7z" fill="' + (lit ? 'var(--accent)' : 'var(--surface-2)') + '" stroke="var(--line)"/></svg>';
+}
+function settle() {
+  var n = firstTry >= 3 ? 3 : (firstTry === 2 ? 2 : 1);
+  stars.save('06', n);
+  nextBtn.hidden = true;
+  valveBtn.hidden = true;
+  qarea.innerHTML = '<div class="result">' +
+    '<h2>本局结算</h2>' +
+    '<div class="stars">' + starSVG(n >= 1) + starSVG(n >= 2) + starSVG(n >= 3) + '</div>' +
+    '<p class="lead">首猜命中 <b class="num hl">' + firstTry + '</b> ／ 3 关，拿下 <b class="num">' + n + '</b> 颗星。</p>' +
+    '<div class="review">' +
+    '<span class="chip">称重法：F浮 ＝ G − F示</span>' +
+    '<span class="chip">阿基米德原理：F浮 ＝ ρ液 g V排</span>' +
+    '<span class="chip">浸没之后，浮力不随深度变</span>' +
+    '</div>' +
+    '<button class="btn" id="againBtn">再来一次</button>' +
+    '</div>';
+  sfx('win');
+  document.getElementById('againBtn').addEventListener('click', function () {
+    sfx('tap');
+    startRound();
+  });
+}
+function startRound() {
+  order = shuffle(QUESTIONS);
+  idx = 0; firstTry = 0; hintIdx = 0;
+  qarea.innerHTML = '<p class="qtext" id="qtext"></p><div class="optrow" id="optrow"></div>';
+  qtext = document.getElementById('qtext');
+  optrow = document.getElementById('optrow');
+  showQ();
+}
+startRound();
+</script>
+</body>
+</html>

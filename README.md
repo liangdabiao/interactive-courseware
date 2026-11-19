@@ -26,6 +26,14 @@ AI 就会走完一套专业流程，最后交付一个文件夹：
 3. AI 会先给你一份《课件设计蓝图》（两三分钟就能读完）：学员是谁、整节课包装成什么故事、做几个游戏、用哪组配色、每页讲什么。你确认或提修改。
 4. 确认后 AI 一口气生成全部页面、装进播放器、打包成单文件，并在浏览器里把每个互动都点一遍。
 
+## 一个完整的例子
+
+[`examples/archimedes-buoyancy/`](examples/archimedes-buoyancy/) 是用这套方法做出的整节课——《阿基米德与浮力》：8 页互动课件，讲阿基米德用一缸水破"王冠掺银"悬案。里面的 `课件.html` 双击就能上课；想改哪页，直接改对应的 `page-xx.html`，再跑一次 `python pack.py`。
+
+![课件封面](examples/archimedes-buoyancy/screenshots/01-cover.png)
+
+更多截图在 [`examples/archimedes-buoyancy/screenshots/`](examples/archimedes-buoyancy/screenshots/)：实验台拖拽、开闸验证、破案推理链。
+
 ## 不用 AI，手工也能做
 
 三件套都在仓库里，流程和上面完全一样：
@@ -71,4 +79,4 @@ AI 就会走完一套专业流程，最后交付一个文件夹：
 
 社区支持： https://linux.do
 
-参考文章 [参考文章.txt](https://mp.weixin.qq.com/s/1aVZqBSpDuNGqiPPPpXijA) 
+参考文章 ： https://mp.weixin.qq.com/s/1aVZqBSpDuNGqiPPPpXijA

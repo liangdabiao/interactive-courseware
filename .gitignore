@@ -2,3 +2,6 @@
 Thumbs.db
 _packtest/
 *.log
+
+# 本地工作课件（入库的是 examples/ 下的策展版本）
+/archimedes-buoyancy/
