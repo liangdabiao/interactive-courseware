@@ -32,7 +32,7 @@ AI 就会走完一套专业流程，最后交付一个文件夹：
 
 [`examples/archimedes-buoyancy/`](examples/archimedes-buoyancy/) 是用这套方法做出的整节课——《阿基米德与浮力》：8 页互动课件，讲阿基米德用一缸水破"王冠掺银"悬案。里面的 `课件.html` 双击就能上课；想改哪页，直接改对应的 `page-xx.html`，再跑一次 `python pack.py`。
 
-![课件封面](examples/archimedes-buoyancy/screenshots/01-cover.png)
+![课件内页 · 排水实验台](examples/archimedes-buoyancy/screenshots/04-lab.png)
 
 更多截图在 [`examples/archimedes-buoyancy/screenshots/`](examples/archimedes-buoyancy/screenshots/)：实验台拖拽、开闸验证、破案推理链。
 
