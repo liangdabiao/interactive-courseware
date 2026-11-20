@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>阿基米德与浮力 · 04 · 排水实验台</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #F6F1E7;                      /* 底色 */
+  --surface: #FFFDF8;                 /* 卡片、面板 */
+  --surface-2: #EBE4D6;               /* 凹槽、轨道、未选中的底 */
+  --ink: #1F1B16;                     /* 主文字 */
+  --ink-2: #5A544A;                   /* 次要文字 */
+  --ink-3: #736D62;                   /* 说明文字 */
+  --line: rgba(31, 27, 22, 0.14);     /* 描边、分隔线 */
+  --accent: #C4411A;                  /* 唯一的强调色 */
+  --accent-ink: #FFFFFF;              /* 强调色上面的文字 */
+  --water: #8FA6BC;                   /* 全课唯一的附加色：水的实物色（降饱和） */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.exp { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 1.6rem; min-height: 0; }
+.bench { min-height: 0; display: flex; align-items: center; justify-content: center; }
+.bench svg { max-height: 100%; width: auto; max-width: 100%; touch-action: none; user-select: none; -webkit-user-select: none; }
+#grab { cursor: grab; }
+.panel { display: flex; flex-direction: column; gap: 0.9rem; min-height: 0; }
+.reads { padding: 0.9rem 1.2rem; display: flex; flex-direction: column; }
+.rrow { display: flex; justify-content: space-between; align-items: baseline; gap: 1em; padding: 0.42rem 0; border-bottom: 1px dashed var(--line); }
+.rrow:last-child { border-bottom: 0; }
+.rrow span { font-size: 0.95rem; color: var(--ink-2); }
+.rrow b { font-size: 1.35rem; font-weight: 700; }
+.rrow.eq.on span, .rrow.eq.on b { color: var(--accent); }
+.panel h3 { margin-top: 0.2rem; }
+.disc { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.45rem; }
+.disc li { display: flex; align-items: center; gap: 0.7em; color: var(--ink-3); font-weight: 600; }
+.box { flex: none; width: 1.5em; height: 1.5em; border-radius: 0.45em; border: 2px solid var(--line); display: grid; place-items: center; }
+.disc li.done { color: var(--ink); }
+.disc li.done .box { background: var(--accent); border-color: var(--accent); }
+.disc li.done .box::after { content: '✓'; color: var(--accent-ink); font-weight: 800; font-size: 0.95em; }
+.actions { display: flex; gap: 0.8rem; justify-content: flex-end; align-items: center; margin-top: auto; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">探索 · 证据一</p>
+    <h1 class="in" style="--i:1">把石块按进水里</h1>
+  </header>
+  <main class="exp">
+    <figure class="bench in" style="--i:2">
+      <svg id="bench" viewBox="0 0 820 560" role="img" aria-label="排水实验台：弹簧测力计吊着石块，浸入溢水槽">
+        <rect x="70" y="40" width="16" height="470" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+        <rect x="30" y="506" width="176" height="18" rx="9" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3"/>
+        <rect x="80" y="54" width="390" height="14" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+        <rect x="370" y="22" width="120" height="84" rx="12" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+        <rect x="386" y="38" width="88" height="52" rx="6" fill="var(--surface-2)"/>
+        <g stroke="var(--ink-3)" stroke-width="2">
+          <line x1="458" y1="42" x2="464" y2="42"/><line x1="458" y1="53" x2="464" y2="53"/>
+          <line x1="458" y1="64" x2="464" y2="64"/><line x1="458" y1="75" x2="464" y2="75"/>
+          <line x1="458" y1="86" x2="464" y2="86"/>
+        </g>
+        <line id="ptr" x1="392" y1="86" x2="456" y2="86" stroke="var(--accent)" stroke-width="3"/>
+        <text id="fsText" x="498" y="60" font-size="32" font-weight="800" fill="var(--ink)" font-family="ui-monospace, Menlo, monospace">4.0</text>
+        <text id="fsLabel" x="498" y="88" font-size="15" fill="var(--ink-3)">空气中 · F示 = G</text>
+        <line id="cable" x1="430" y1="106" x2="430" y2="168" stroke="var(--ink)" stroke-width="3"/>
+        <g id="stoneG">
+          <polygon points="430,168 470,182 486,214 466,246 424,252 396,224 402,186" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+        </g>
+        <rect id="waterB" x="344" y="272" width="172" height="176" fill="var(--water)" opacity="0.5"/>
+        <path d="M340 270 V450 H520 V288 h36" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+        <path id="stream" d="M556 292 q 3 50 4 94" fill="none" stroke="var(--water)" stroke-width="6" stroke-linecap="round" opacity="0"/>
+        <path d="M540 390 V455 H680 V390" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+        <rect id="cupWater" x="544" y="451" width="132" height="0" fill="var(--water)" opacity="0.6"/>
+        <text x="430" y="482" text-anchor="middle" font-size="15" fill="var(--ink-3)">溢水槽 · 原本装满水</text>
+        <text x="610" y="482" text-anchor="middle" font-size="15" fill="var(--ink-3)">小杯 · 排开的水</text>
+        <text id="gpText" x="610" y="372" text-anchor="middle" font-size="30" font-weight="800" fill="var(--ink)" font-family="ui-monospace, Menlo, monospace">0.0 N</text>
+        <rect id="grab" x="380" y="140" width="110" height="240" fill="transparent" pointer-events="all"/>
+      </svg>
+    </figure>
+    <div class="panel in" style="--i:3">
+      <div class="reads card">
+        <div class="rrow"><span>空气中物重 G</span><b class="num">4.0 N</b></div>
+        <div class="rrow"><span>浸入后读数 F示</span><b class="num" id="rFs">4.0 N</b></div>
+        <div class="rrow"><span>浮力 F浮 = G − F示</span><b class="num" id="rFf">0.0 N</b></div>
+        <div class="rrow eq" id="rowEq"><span>排开的水重 G排</span><b class="num" id="rGp">0.0 N</b></div>
+      </div>
+      <h3 class="in" style="--i:4">这一趟，要发现三件事</h3>
+      <ul class="disc">
+        <li id="d1"><i class="box"></i><span>浸入后，示数变小了</span></li>
+        <li id="d2"><i class="box"></i><span>浸没后再往下，示数不再变</span></li>
+        <li id="d3"><i class="box"></i><span>F浮 和 G排 竟然相等</span></li>
+      </ul>
+      <p class="note" id="note">按住石块，往下拖——盯着右边这几个数。</p>
+      <div class="actions">
+        <button class="btn ghost" id="hint">提示</button>
+        <button class="btn" id="goNext" hidden>带证据去见老师 →</button>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 石块参数：与第 3 页同一块——G = 4.0 N，浸没浮力 1.6 N（g 取 10 N/kg） */
+var PHYS = { G: 4.0, FB_MAX: 1.6, DY_MAX: 112, RANGE: 300 };
+/* 发现清单：三条逐一点亮 */
+var FINDS = {
+  d1: '石头一沾水，读数就往下掉——有个力在向上托它。',
+  d2: '浸没之后 V排 到了顶，再往下浮力也不再变大。',
+  d3: '三条证据集齐：F浮 和 G排 画上了等号！'
+};
+var t = 0, dragging = false, startT = 0, startY = 0;
+var seen = { d1: false, d2: false, d3: false };
+var reachedBottom = false, leftBottom = false, doneAll = false;
+var svg = document.getElementById('bench');
+var grab = document.getElementById('grab');
+var stoneG = document.getElementById('stoneG');
+var cable = document.getElementById('cable');
+var ptr = document.getElementById('ptr');
+var fsText = document.getElementById('fsText');
+var fsLabel = document.getElementById('fsLabel');
+var gpText = document.getElementById('gpText');
+var rFs = document.getElementById('rFs');
+var rFf = document.getElementById('rFf');
+var rGp = document.getElementById('rGp');
+var rowEq = document.getElementById('rowEq');
+var cupWater = document.getElementById('cupWater');
+var stream = document.getElementById('stream');
+var note = document.getElementById('note');
+var goNext = document.getElementById('goNext');
+function svgY(evt) {
+  var pt = svg.createSVGPoint(); pt.x = evt.clientX; pt.y = evt.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse()).y;
+}
+function check(name) {
+  if (seen[name]) return;
+  seen[name] = true;
+  var li = document.getElementById(name);
+  li.classList.add('done');
+  sfx('ok');
+  fx(li, 'pop');
+  if (doneAll) return;
+  note.textContent = FINDS[name];
+  if (seen.d1 && seen.d2 && seen.d3) {
+    doneAll = true;
+    note.classList.add('good');
+    goNext.hidden = false;
+    sfx('win');
+  }
+}
+function render() {
+  var dy = t * PHYS.DY_MAX;
+  stoneG.setAttribute('transform', 'translate(0 ' + dy + ')');
+  grab.setAttribute('transform', 'translate(0 ' + dy + ')');
+  cable.setAttribute('y2', 168 + dy);
+  var Fs = PHYS.G - PHYS.FB_MAX * t, Ff = PHYS.FB_MAX * t;
+  var ptrY = 42 + (Fs / 4) * 44;
+  ptr.setAttribute('y1', ptrY); ptr.setAttribute('y2', ptrY);
+  fsText.textContent = Fs.toFixed(1);
+  fsLabel.textContent = t > 0.02 ? '浸入中 · 读数 F示' : '空气中 · F示 = G';
+  rFs.textContent = Fs.toFixed(1) + ' N';
+  rFf.textContent = Ff.toFixed(1) + ' N';
+  rGp.textContent = Ff.toFixed(1) + ' N';
+  gpText.textContent = Ff.toFixed(1) + ' N';
+  var cupH = t * 58;
+  cupWater.setAttribute('y', 451 - cupH);
+  cupWater.setAttribute('height', cupH);
+  stream.style.opacity = t > 0.02 ? 0.9 : 0;
+  if (t > 0.12) check('d1');
+  if (t >= 0.98) {
+    if (reachedBottom && leftBottom) check('d2');
+    reachedBottom = true;
+    rowEq.classList.add('on');
+    check('d3');
+  }
+  if (t < 0.9 && reachedBottom) leftBottom = true;
+}
+grab.addEventListener('pointerdown', function (e) {
+  e.preventDefault();
+  dragging = true;
+  startT = t;
+  startY = svgY(e);
+  grab.setPointerCapture(e.pointerId);
+  sfx('tap');
+});
+grab.addEventListener('pointermove', function (e) {
+  if (!dragging) return;
+  t = Math.min(1, Math.max(0, startT + (svgY(e) - startY) / PHYS.RANGE));
+  render();
+});
+function endDrag() { dragging = false; }
+grab.addEventListener('pointerup', endDrag);
+grab.addEventListener('pointercancel', endDrag);
+var HINTS = [
+  '方法：按住石块往下拖，右边四个数都会跟着动。',
+  '线索：示数减小多少，浮力就是多少；小杯里的水也跟着变重。',
+  '答案：浸没那一刻，F浮 = 1.6 N，G排 也正好是 1.6 N。把石块拉起来再按到底，就能看到“浸没后不变”。'
+];
+var hintIdx = 0;
+document.getElementById('hint').addEventListener('click', function () {
+  note.textContent = HINTS[Math.min(hintIdx, HINTS.length - 1)];
+  hintIdx++;
+  sfx('tap');
+});
+goNext.addEventListener('click', function () { sfx('tap'); deck('next'); });
+</script>
+</body>
+</html>

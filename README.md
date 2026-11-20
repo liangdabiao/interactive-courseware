@@ -2,6 +2,8 @@
 
 把一节课的讲义交给 AI，还你一套能直接上课的网页课件。
 
+> **在线预览**：<https://liangdabiao.github.io/interactive-courseware/> —— 两个示例课件（阿基米德与浮力 / 勾股定理双证记）可直接在浏览器里试玩，由 `docs/` 目录经 GitHub Pages 发布。
+
 ## 这是什么
 
 这是一个 AI 编程工具（ZCode、Claude Code 等）的 **skill（技能包）**。装好之后，你只需要说一句：
