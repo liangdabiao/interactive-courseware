@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>阿基米德的机械房 · 08 · 数绳子的人</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #000000;                      /* 底色 */
+  --surface: #131313;                 /* 卡片、面板 */
+  --surface-2: #222222;               /* 凹槽、轨道、未选中的底 */
+  --ink: #FFFFFF;                     /* 主文字 */
+  --ink-2: #B9B9B9;                   /* 次要文字 */
+  --ink-3: #7C7C7C;                   /* 说明文字 */
+  --line: rgba(255, 255, 255, 0.14);  /* 描边、分隔线 */
+  --accent: #FFD23F;                  /* 唯一的强调色 */
+  --accent-ink: #1A1400;              /* 强调色上面的文字 */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.duo { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 1.8rem; min-height: 0; }
+.figbox { min-height: 0; display: flex; align-items: center; justify-content: center; }
+.figbox svg { max-height: 100%; width: auto; max-width: 100%; }
+.seg { stroke: var(--accent); stroke-width: 7; stroke-linecap: round; opacity: 0.16; transition: opacity 0.25s; }
+.seg.lit { opacity: 1; }
+.panel { display: flex; flex-direction: column; gap: 0.8rem; min-height: 0; }
+.ncard { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 0.9rem 1.2rem; }
+.ncard .big { font-size: 2.6rem; font-weight: 800; color: var(--accent); }
+.ncard .lbl { color: var(--ink-2); font-size: 0.95rem; }
+.optrow { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+.optrow .btn { flex: 1; min-width: 0; }
+.optrow .btn.right { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
+.foot { display: flex; gap: 0.8rem; justify-content: flex-end; align-items: center; margin-top: auto; flex-wrap: wrap; }
+.lift { transition: transform 1.1s cubic-bezier(0.3, 1, 0.4, 1); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">探索 · 滑轮组机房</p>
+    <h1 class="in" style="--i:1">数绳子的人</h1>
+  </header>
+  <main class="duo">
+    <figure class="figbox in" style="--i:2">
+      <svg id="room" viewBox="0 0 860 520" role="img" aria-label="滑轮组：数承重绳段并验证拉力">
+        <rect x="150" y="40" width="560" height="14" rx="7" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
+        <text x="150" y="30" font-size="15" fill="var(--ink-3)">横梁（定滑轮挂在这里）</text>
+        <g id="d1">
+          <circle cx="430" cy="120" r="42" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3.5"/>
+          <line class="seg" x1="430" y1="380" x2="430" y2="162" />
+          <path d="M430 380 L430 120 L474 120 L474 268" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+          <rect class="lift" x="398" y="380" width="64" height="66" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <text class="lift" x="430" y="420" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink-2)">G物＝400N</text>
+          <text x="500" y="290" font-size="15" font-weight="700" fill="var(--accent)">F</text>
+          <text x="392" y="470" font-size="14" fill="var(--ink-3)">方案一 · 一个定滑轮</text>
+        </g>
+        <g id="d2" visibility="hidden">
+          <circle cx="600" cy="120" r="34" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3.5"/>
+          <circle cx="430" cy="266" r="38" fill="var(--accent)" fill-opacity="0.22" stroke="var(--accent)" stroke-width="3.5"/>
+          <line class="seg" x1="394" y1="54" x2="394" y2="234"/>
+          <line class="seg" x1="466" y1="234" x2="466" y2="120"/>
+          <path d="M394 54 L394 234 L600 234 L600 120 L600 120" fill="none" stroke="var(--ink)" stroke-width="3.5" opacity="0.55"/>
+          <path d="M634 120 L634 268" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+          <circle cx="600" cy="120" r="5" fill="var(--accent)"/>
+          <rect class="lift" x="398" y="304" width="64" height="66" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <text class="lift" x="430" y="344" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink-2)">G物＝400N</text>
+          <text x="640" y="286" font-size="15" font-weight="700" fill="var(--accent)">F</text>
+          <text x="392" y="470" font-size="14" fill="var(--ink-3)">方案二 · 1 定 1 动</text>
+        </g>
+        <g id="d3" visibility="hidden">
+          <circle cx="360" cy="120" r="34" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3.5"/>
+          <circle cx="560" cy="120" r="34" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3.5"/>
+          <circle cx="460" cy="266" r="38" fill="var(--accent)" fill-opacity="0.22" stroke="var(--accent)" stroke-width="3.5"/>
+          <line class="seg" x1="460" y1="228" x2="460" y2="158"/>
+          <line class="seg" x1="424" y1="238" x2="424" y2="120"/>
+          <line class="seg" x1="496" y1="238" x2="496" y2="120"/>
+          <path d="M460 228 L460 158 L360 158 L360 120 M424 238 L424 120 M496 238 L496 120 L560 120 L560 168" fill="none" stroke="var(--ink)" stroke-width="3.5" opacity="0.55"/>
+          <path d="M560 168 L560 268" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+          <circle cx="460" cy="228" r="5" fill="var(--accent)"/>
+          <rect class="lift" x="428" y="304" width="64" height="66" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <text class="lift" x="460" y="344" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink-2)">G物＝400N</text>
+          <text x="566" y="286" font-size="15" font-weight="700" fill="var(--accent)">F</text>
+          <text x="392" y="470" font-size="14" fill="var(--ink-3)">方案三 · 2 定 1 动</text>
+        </g>
+        <g id="d4" visibility="hidden">
+          <circle cx="540" cy="120" r="34" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3.5"/>
+          <rect x="392" y="240" width="140" height="64" rx="14" fill="var(--accent)" fill-opacity="0.22" stroke="var(--accent)" stroke-width="3.5"/>
+          <text x="462" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="var(--accent)">动滑轮组</text>
+          <line class="seg" x1="398" y1="54" x2="398" y2="240"/>
+          <line class="seg" x1="446" y1="240" x2="446" y2="120"/>
+          <line class="seg" x1="478" y1="120" x2="478" y2="240"/>
+          <line class="seg" x1="526" y1="240" x2="526" y2="120"/>
+          <path d="M398 54 L398 240 M446 240 L446 120 L478 120 L478 240 M526 240 L526 120 L540 120 L540 168" fill="none" stroke="var(--ink)" stroke-width="3.5" opacity="0.55"/>
+          <path d="M540 168 L540 268" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+          <rect class="lift" x="428" y="310" width="68" height="66" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <text class="lift" x="462" y="350" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink-2)">G物＝400N</text>
+          <text x="546" y="286" font-size="15" font-weight="700" fill="var(--accent)">F</text>
+          <text x="392" y="470" font-size="14" fill="var(--ink-3)">方案四 · 2 定 2 动（动滑轮组）</text>
+        </g>
+      </svg>
+    </figure>
+    <div class="panel in" style="--i:3">
+      <div class="ncard card">
+        <span class="lbl">承重绳段数</span>
+        <span class="big num" id="nBig">—</span>
+        <span class="lbl">F ＝ (G物＋G动) ÷ n<span class="small">（定滑轮方案 F＝G）</span></span>
+      </div>
+      <p class="note" id="note">方案一：一个定滑轮吊 400N 的货。先点「数一段」，看承重绳有几段。</p>
+      <div class="optrow" id="optrow" hidden></div>
+      <div class="foot">
+        <button class="btn ghost" id="countBtn">数一段</button>
+        <button class="btn ghost" id="hintBtn">提示</button>
+        <button class="btn" id="nextBtn" hidden>下一方案 →</button>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 四种绕线：n = 承重绳段数。G物＝400N，G动＝40N（方案一没有动滑轮） */
+var PLANS = [
+  { id: 'd1', n: 1, chip: '方案一 · 定滑轮', s0: '400N',
+    opts: ['200N', '400N', '440N'], ok: 1,
+    why: ['200N 那是动滑轮的账——这方案里根本没有动滑轮。', null, '440N 是把动滑轮硬加进来——定滑轮不背这个重量。'],
+    okText: 'F＝G＝400N：只转向，不省力。数完这一段，去换讨巧的方案。' },
+  { id: 'd2', n: 2, chip: '方案二 · 1 定 1 动', s0: '220N',
+    opts: ['110N', '220N', '440N'], ok: 1,
+    why: ['110N 太小——那是 n＝4 才有的待遇，这里只有两段绳。', null, '440N 是干脆不省力——两段绳白绕了。'],
+    okText: 'F＝(400＋40)÷2＝220N。省一半力，代价：货升 1 米要拉 2 米绳。' },
+  { id: 'd3', n: 3, chip: '方案三 · 2 定 1 动', s0: '147N',
+    opts: ['147N', '220N', '110N'], ok: 0,
+    why: ['——', '220N 是两段绳的账，这里是三段。', '110N 是四段绳的账——别把没绕的绳也数进去。'],
+    okText: 'F＝(400＋40)÷3＝146.7≈147N。三段绳，三份分担。' },
+  { id: 'd4', n: 4, chip: '方案四 · 2 定 2 动', s0: '110N',
+    opts: ['220N', '147N', '110N'], ok: 2,
+    why: ['220N——那是两段。', '147N——那是三段。', null],
+    okText: 'F＝(400＋40)÷4＝110N。四段绳，每段只扛四分之一。' }
+];
+var stageIdx = 0, segIdx = 0, answered = false, mistakes = 0, hintIdx = 0;
+var note = document.getElementById('note');
+var nBig = document.getElementById('nBig');
+var countBtn = document.getElementById('countBtn');
+var hintBtn = document.getElementById('hintBtn');
+var nextBtn = document.getElementById('nextBtn');
+var optrow = document.getElementById('optrow');
+function showPlan(i) {
+  stageIdx = i;
+  var st = PLANS[i];
+  ['d1', 'd2', 'd3', 'd4'].forEach(function (id, k) {
+    document.getElementById(id).setAttribute('visibility', k === i ? 'visible' : 'hidden');
+  });
+  document.querySelectorAll('.seg').forEach(function (s) { s.classList.remove('lit'); });
+  segIdx = 0; answered = false; hintIdx = 0;
+  document.getElementById(st.id).querySelectorAll('.seg').forEach(function (s) { s.classList.remove('lit'); });
+  nBig.textContent = '—';
+  countBtn.hidden = false; countBtn.textContent = '数一段';
+  optrow.hidden = true; optrow.innerHTML = '';
+  nextBtn.hidden = true;
+  note.className = 'note';
+  note.textContent = i === 0 ? '方案一：一个定滑轮吊 400N 的货。先点「数一段」，看承重绳有几段。' : '换方案了。老规矩：先数段，再预测，最后起吊验证。';
+}
+countBtn.addEventListener('click', function () {
+  var st = PLANS[stageIdx];
+  var segs = document.getElementById(st.id).querySelectorAll('.seg');
+  if (segIdx < segs.length) {
+    segs[segIdx].classList.add('lit');
+    segIdx++;
+    nBig.textContent = segIdx;
+    sfx('tap');
+    if (segIdx === segs.length) {
+      countBtn.hidden = true;
+      nBig.textContent = 'n＝' + st.n;
+      note.textContent = st.chip + '：承重绳 n＝' + st.n + '。先猜拉力 F 是多少？';
+      buildOpts();
+    }
+  }
+});
+function buildOpts() {
+  var st = PLANS[stageIdx];
+  optrow.hidden = false;
+  optrow.innerHTML = '';
+  st.opts.forEach(function (label, i) {
+    var b = document.createElement('button');
+    b.className = 'btn ghost';
+    b.textContent = label;
+    b.addEventListener('click', function () {
+      if (answered) return;
+      if (i === st.ok) {
+        answered = true;
+        sfx('ok');
+        b.classList.remove('ghost');
+        b.classList.add('right');
+        fx(b, 'pop');
+        note.textContent = st.okText + ' 起吊验证——';
+        note.className = 'note good';
+        setTimeout(lift, 600);
+      } else {
+        mistakesPlus();
+        sfx('no');
+        b.disabled = true;
+        fx(b, 'shake');
+        note.textContent = st.why[i] || '这个数对不上，用公式再核一遍。';
+        note.className = 'note bad';
+      }
+    });
+    optrow.appendChild(b);
+  });
+}
+var mistakesPlus = function () { mistakes++; };
+function lift() {
+  var st = PLANS[stageIdx];
+  var boxes = document.getElementById(st.id).querySelectorAll('.lift');
+  boxes.forEach(function (b) { b.style.transform = 'translateY(-42px)'; });
+  sfx('win');
+  setTimeout(function () {
+    note.textContent = st.okText.replace(' 起吊验证——', '') + ' 起吊成功：读数 ' + st.s0 + '。';
+    nextBtn.hidden = false;
+    nextBtn.textContent = stageIdx < PLANS.length - 1 ? '下一方案 →' : '去终局 · 拖动大船 →';
+  }, 1300);
+}
+nextBtn.addEventListener('click', function () {
+  sfx('tap');
+  if (stageIdx < PLANS.length - 1) showPlan(stageIdx + 1);
+  else deck('next');
+});
+hintBtn.addEventListener('click', function () {
+  var tips = [
+    '方法：数「直接拴着动滑轮（或货）」的绳段，一段就是一份分担。',
+    '线索：只数向上拉着动滑轮的那几段；绕过定滑轮去手上的尾巴不算。',
+    '公式：F ＝ (G物＋G动) ÷ n ＝ (400＋40) ÷ n。'
+  ];
+  note.className = 'note';
+  note.textContent = tips[Math.min(hintIdx, tips.length - 1)];
+  hintIdx++;
+  sfx('tap');
+});
+showPlan(0);
+var mistakes = 0;
+</script>
+</body>
+</html>

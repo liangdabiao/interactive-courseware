@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>勾股定理双证记 · 09 · 无数种证明</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #F2F4F6;                      /* 底色 */
+  --surface: #FFFFFF;                 /* 卡片、面板 */
+  --surface-2: #E4E8EC;               /* 凹槽、轨道、未选中的底 */
+  --ink: #14171C;                     /* 主文字 */
+  --ink-2: #4D5560;                   /* 次要文字 */
+  --ink-3: #68717D;                   /* 说明文字 */
+  --line: rgba(20, 23, 28, 0.12);     /* 描边、分隔线 */
+  --accent: #2F5BEA;                  /* 唯一的强调色 */
+  --accent-ink: #FFFFFF;              /* 强调色上面的文字 */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.stage > header { text-align: center; }
+.end { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; text-align: center; }
+.badges { display: flex; gap: 2rem; align-items: flex-end; }
+.badge { width: 11rem; }
+.badge svg { width: 100%; height: auto; }
+.score { font-size: 1.15rem; color: var(--ink-2); letter-spacing: 0.06em; }
+.score b { font-size: 2.5rem; color: var(--accent); margin: 0 0.12em; }
+.recap { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+.endnote { max-width: 30em; }
+.bonus { display: none; align-items: center; gap: 1.1rem; text-align: left; }
+.bonus.show { display: flex; }
+.bonus svg { width: 7rem; flex: none; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">结案 · 归档</p>
+    <h1 class="in" style="--i:1">无数种证明</h1>
+  </header>
+  <main class="end">
+    <div class="badges in" style="--i:2">
+      <figure class="badge">
+        <svg viewBox="0 0 160 190" role="img" aria-label="加菲尔德徽章：拼图与盾形">
+          <path d="M80 6 L150 30 L150 100 Q150 156 80 184 Q10 156 10 100 L10 30 Z" fill="var(--surface)" stroke="var(--ink)" stroke-width="5" stroke-linejoin="round"/>
+          <polygon points="52,74 96,74 52,126" fill="var(--accent)" fill-opacity="0.2"/>
+          <polygon points="96,74 118,96 96,126" fill="var(--ink)" fill-opacity="0.12"/>
+          <circle class="gem" id="g0" cx="60" cy="46" r="11" fill="var(--surface-2)" stroke="var(--line)" stroke-width="2"/>
+          <circle class="gem" id="g1" cx="90" cy="46" r="11" fill="var(--surface-2)" stroke="var(--line)" stroke-width="2"/>
+          <circle class="gem" id="g2" cx="75" cy="72" r="11" fill="var(--surface-2)" stroke="var(--line)" stroke-width="2"/>
+          <text x="80" y="178" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink-2)">加菲尔德 · 拼出梯形</text>
+        </svg>
+      </figure>
+      <figure class="badge">
+        <svg viewBox="0 0 160 190" role="img" aria-label="爱因斯坦徽章：灯泡与垂线">
+          <path d="M80 10 Q140 10 140 78 Q140 108 112 128 L112 148 L48 148 L48 128 Q20 108 20 78 Q20 10 80 10 Z" fill="var(--surface)" stroke="var(--ink)" stroke-width="5" stroke-linejoin="round"/>
+          <rect x="52" y="150" width="56" height="14" rx="7" fill="var(--surface)" stroke="var(--ink)" stroke-width="4"/>
+          <path d="M70 96 L70 44 L118 96 Z" fill="none" stroke="var(--ink-3)" stroke-width="2.5"/>
+          <circle class="gem" id="g3" cx="56" cy="60" r="11" fill="var(--surface-2)" stroke="var(--line)" stroke-width="2"/>
+          <circle class="gem" id="g4" cx="104" cy="52" r="11" fill="var(--surface-2)" stroke="var(--line)" stroke-width="2"/>
+          <circle class="gem" id="g5" cx="80" cy="118" r="11" fill="var(--surface-2)" stroke="var(--line)" stroke-width="2"/>
+          <text x="80" y="182" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink-2)">爱因斯坦 · 同形一本账</text>
+        </svg>
+      </figure>
+    </div>
+    <p class="score num in" style="--i:3">本课星星 <b id="totalNum">0</b> ／ 6</p>
+    <div class="recap in" style="--i:4">
+      <span class="chip">加菲尔德：梯形面积，两种算法</span>
+      <span class="chip">爱因斯坦：同形放大，一本账</span>
+      <span class="chip">判案思路：面积会说话</span>
+      <span class="chip">定理的证法已收集 400 多种</span>
+    </div>
+    <p class="note in endnote" style="--i:5" id="note">徽章上的宝石，正被你的星星一颗颗点亮……</p>
+    <div class="bonus card in" id="bonus">
+      <svg viewBox="0 0 120 120" role="img" aria-label="赵爽弦图">
+        <rect x="10" y="10" width="100" height="100" fill="none" stroke="var(--ink)" stroke-width="3"/>
+        <polygon points="50,10 110,50 70,110 10,70" fill="var(--accent)" fill-opacity="0.2" stroke="var(--accent)" stroke-width="2.5"/>
+        <polygon points="10,10 50,10 10,70" fill="var(--ink)" fill-opacity="0.1"/>
+        <polygon points="110,10 50,10 110,50" fill="var(--ink)" fill-opacity="0.1"/>
+        <polygon points="110,110 110,50 70,110" fill="var(--ink)" fill-opacity="0.1"/>
+        <polygon points="10,110 10,70 70,110" fill="var(--ink)" fill-opacity="0.1"/>
+        <text x="60" y="118" text-anchor="middle" font-size="14" fill="var(--ink-3)">弦图 · 赵爽</text>
+      </svg>
+      <div>
+        <h3>第三份手稿已到馆</h3>
+        <p class="small">约 1800 年前，中国的赵爽用一张「弦图」给出了无字证明——四个全同直角三角形，围出一个斜边正方形。去课本里见它。</p>
+      </div>
+    </div>
+    <div class="in" style="--i:6">
+      <button class="btn ghost" id="replay">从头再看一遍</button>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 结算：第 4 页拼图 3 颗 + 第 8 页鉴定 3 颗，最多 6 颗 */
+var TOTAL_MAX = 6;
+var s04 = Math.min(stars.all()['04'] || 0, 3);
+var s08 = Math.min(stars.all()['08'] || 0, 3);
+var total = Math.min(s04 + s08, TOTAL_MAX);
+document.getElementById('totalNum').textContent = total;
+var note = document.getElementById('note');
+var gems = [];
+for (var i = 0; i < TOTAL_MAX; i++) gems.push(document.getElementById('g' + i));
+var lit = 0;
+function lightNext() {
+  if (lit >= total) { finish(); return; }
+  var g = gems[lit];
+  g.setAttribute('fill', 'var(--accent)');
+  g.setAttribute('stroke', 'none');
+  fx(g, 'pop');
+  sfx('ok');
+  lit++;
+  setTimeout(lightNext, 340);
+}
+function finish() {
+  if (total >= TOTAL_MAX) {
+    sfx('win');
+    document.getElementById('bonus').classList.add('show');
+    note.innerHTML = '满星归档！档案馆加开新特藏：<b class="hl">第三份手稿</b>——赵爽弦图，比他们早了一千多年。';
+    note.className = 'note good';
+  } else {
+    var left = TOTAL_MAX - total;
+    note.innerHTML = '还有 <b class="num hl">' + left + '</b> 颗星，藏在「拼出梯形」和「鉴定报告」两页——翻回去再拿几颗。';
+  }
+}
+setTimeout(lightNext, 700);
+document.getElementById('replay').addEventListener('click', function () {
+  sfx('tap');
+  deck('go', 0);
+});
+</script>
+</body>
+</html>

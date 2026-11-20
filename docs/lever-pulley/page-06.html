@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>阿基米德的机械房 · 06 · 八件兵器，两口箱子</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #000000;                      /* 底色 */
+  --surface: #131313;                 /* 卡片、面板 */
+  --surface-2: #222222;               /* 凹槽、轨道、未选中的底 */
+  --ink: #FFFFFF;                     /* 主文字 */
+  --ink-2: #B9B9B9;                   /* 次要文字 */
+  --ink-3: #7C7C7C;                   /* 说明文字 */
+  --line: rgba(255, 255, 255, 0.14);  /* 描边、分隔线 */
+  --accent: #FFD23F;                  /* 唯一的强调色 */
+  --accent-ink: #1A1400;              /* 强调色上面的文字 */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.col { display: flex; flex-direction: column; gap: 0.6rem; min-height: 0; flex: 1; }
+.items { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.6rem; }
+.item { border: 1.5px solid var(--line); border-radius: 0.9rem; background: var(--surface); padding: 0.4rem 0.3rem 0.3rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.1rem; cursor: pointer; text-align: center;
+  transition: border-color 0.2s, transform 0.12s; }
+.item:hover { border-color: color-mix(in srgb, var(--ink) 32%, transparent); }
+.item:active { transform: scale(0.98); }
+.item.sel { border-color: var(--accent); }
+.item svg { height: 78px; width: auto; max-width: 100%; }
+.item .nm { font-size: max(0.8rem, 14px); font-weight: 700; }
+.item .tip { font-size: 12px; color: var(--ink-3); }
+.bins { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+.bin { border: 1.5px dashed var(--line); border-radius: 1.2rem; padding: 0.6rem 1rem; min-height: 5.2em; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s; }
+.bin.hot { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.bin.filled { border-style: solid; }
+.bin h3 { display: flex; align-items: baseline; gap: 0.6em; }
+.bin h3 .num { font-size: 0.9rem; color: var(--accent); }
+.bin .sub { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.bin .stack { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.4rem; }
+.bin .sub { margin: 0; }
+.foot { display: flex; gap: 0.8rem; justify-content: flex-end; align-items: center; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">练习 · 分拣场</p>
+    <h1 class="in" style="--i:1">八件兵器，两口箱子</h1>
+  </header>
+  <main class="col">
+    <p class="lead in" style="--i:2">每件兵器都标了<b class="hl">黄点＝支点</b>。看支点两边谁的力臂长，点选它，投进对应的箱子。</p>
+    <div class="items in" style="--i:3">
+      <div class="item" data-i="0">
+        <svg viewBox="0 0 110 66" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><line x1="30" y1="12" x2="80" y2="52"/><line x1="80" y1="12" x2="30" y2="52"/><circle cx="26" cy="54" r="7"/><circle cx="84" cy="54" r="7"/></g><circle cx="55" cy="33" r="5" fill="var(--accent)"/></svg>
+        <span class="nm">剪刀</span><span class="tip">支点在中间</span>
+      </div>
+      <div class="item" data-i="1">
+        <svg viewBox="0 0 110 66" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><line x1="42" y1="10" x2="20" y2="56"/><line x1="52" y1="10" x2="30" y2="56"/><line x1="20" y1="56" x2="30" y2="56"/></g><circle cx="46" cy="14" r="5" fill="var(--accent)"/></svg>
+        <span class="nm">镊子</span><span class="tip">支点在尾端</span>
+      </div>
+      <div class="item" data-i="2">
+        <svg viewBox="0 0 110 66" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><line x1="16" y1="30" x2="70" y2="24"/><line x1="16" y1="42" x2="70" y2="34"/><path d="M70 24 q 22 2 24 8 M70 34 q 20 6 24 2"/></g><circle cx="24" cy="36" r="5" fill="var(--accent)"/></svg>
+        <span class="nm">老虎钳</span><span class="tip">支点在钳转轴</span>
+      </div>
+      <div class="item" data-i="3">
+        <svg viewBox="0 0 110 66" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><path d="M14 16 q 40 -6 80 10"/><path d="M26 18 q 30 0 52 16"/><path d="M52 8 l 10 -4"/></g><circle cx="76" cy="26" r="5" fill="var(--accent)"/><circle cx="20" cy="15" r="4" fill="var(--accent-ink)" stroke="var(--accent)" stroke-width="2"/></svg>
+        <span class="nm">理发剪</span><span class="tip">支点偏向刀尖</span>
+      </div>
+      <div class="item" data-i="4">
+        <svg viewBox="0 0 110 66" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><path d="M70 10 L82 44 q 2 8 -8 10 L48 60"/><path d="M62 14 L50 30 M78 16 L66 34"/></g><circle cx="72" cy="12" r="5" fill="var(--accent)"/></svg>
+        <span class="nm">开瓶器</span><span class="tip">支点在钩头</span>
+      </div>
+      <div class="item" data-i="5">
+        <svg viewBox="0 0 110 66" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><path d="M10 14 Q 70 30 100 52"/><circle cx="26" cy="21" r="8"/><path d="M100 52 l 4 8"/></g><circle cx="16" cy="14" r="5" fill="var(--accent)"/></svg>
+        <span class="nm">钓鱼竿</span><span class="tip">支点在竿尾</span>
+      </div>
+      <div class="item" data-i="6">
+        <svg viewBox="0 0 110 66" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><path d="M30 40 L14 24"/><path d="M30 40 L54 42 L92 26"/><path d="M54 42 q 4 10 -2 16"/><circle cx="30" cy="44" r="10"/></g><circle cx="30" cy="44" r="4.5" fill="var(--accent)"/></svg>
+        <span class="nm">独轮车</span><span class="tip">支点在轮轴</span>
+      </div>
+      <div class="item" data-i="7">
+        <svg viewBox="0 0 110 66" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><line x1="52" y1="8" x2="60" y2="60"/><line x1="60" y1="8" x2="54" y2="60"/></g><circle cx="56" cy="10" r="5" fill="var(--accent)"/></svg>
+        <span class="nm">筷子</span><span class="tip">支点在上端</span>
+      </div>
+    </div>
+    <div class="bins in" style="--i:4">
+      <div class="bin" id="binSave">
+        <h3>省力杠杆箱 <span class="num">L₁ ＞ L₂</span></h3>
+        <p class="sub">小力办大事，代价是压过更长的路</p>
+        <div class="stack"></div>
+      </div>
+      <div class="bin" id="binCost">
+        <h3>费力杠杆箱 <span class="num">L₁ ＜ L₂</span></h3>
+        <p class="sub">费点力气，换距离与精准</p>
+        <div class="stack"></div>
+      </div>
+    </div>
+    <p class="note in" style="--i:5" id="note">点一件兵器选中它，再点箱子投进去。全归位即出师。</p>
+    <div class="foot in" style="--i:6">
+      <span class="chip num" id="progress">已归档 0 ／ 8</span>
+      <button class="btn ghost" id="hintBtn">提示</button>
+      <button class="btn" id="goNext" hidden>机械房大堂集合 →</button>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 八件兵器：type 0 = 省力，1 = 费力。wrong = 投错箱时的纠偏讲解 */
+var ITEMS = [
+  { name: '剪刀', type: 0, wrong: '剪刀的支点在中间转轴：手指那段（动力臂）比裁布那段（阻力臂）长——它是省力的，别委屈它。' },
+  { name: '镊子', type: 1, wrong: '镊子支点在尾端，手指用力处离支点近、镊尖离得远——动力臂短，它是费力杠杆。' },
+  { name: '老虎钳', type: 0, wrong: '老虎钳的钳口离转轴近、手柄离转轴远——动力臂长，典型的省力杠杆。' },
+  { name: '理发剪', type: 1, wrong: '理发剪的支点偏向刀尖，手指捏的长柄是动力臂——臂短力大？不，它是特意做成费力的：省距离，剪得快。' },
+  { name: '开瓶器', type: 0, wrong: '开瓶器支点在钩头，瓶盖的阻力离它近、你的手离它远——动力臂长，省力。' },
+  { name: '钓鱼竿', type: 1, wrong: '鱼竿支点在竿尾，鱼在远端——动力臂短、阻力臂长，费力，但鱼一挣，竿尖移动一大段，正好卸力。' },
+  { name: '独轮车', type: 0, wrong: '独轮车的支点是轮轴：货物到轮轴近、手把到轮轴远——动力臂长，省力。' },
+  { name: '筷子', type: 1, wrong: '筷子支点在虎口上端，手指用力的位置到支点近、夹菜端到支点远——费力，但夹得稳准。' }
+];
+var note = document.getElementById('note');
+var progress = document.getElementById('progress');
+var goNext = document.getElementById('goNext');
+var placed = 0, mistakes = 0, hintIdx = 0, selected = null;
+var binSave = document.getElementById('binSave');
+var binCost = document.getElementById('binCost');
+var items = document.querySelectorAll('.item');
+function hot(w) {
+  binSave.classList.toggle('hot', selected !== null && w !== 1);
+  binCost.classList.toggle('hot', selected !== null && w !== 0);
+}
+items.forEach(function (el) {
+  el.addEventListener('click', function () {
+    var i = Number(el.dataset.i);
+    if (selected === el) { el.classList.remove('sel'); selected = null; hot(null); return; }
+    if (selected) selected.classList.remove('sel');
+    selected = el;
+    el.classList.add('sel');
+    sfx('tap');
+    hot(ITEMS[i].type);
+  });
+});
+[binSave, binCost].forEach(function (bin) {
+  bin.addEventListener('click', function () {
+    if (!selected) return;
+    var i = Number(selected.dataset.i);
+    var item = ITEMS[i];
+    var w = bin === binSave ? 0 : 1;
+    if (item.type === w) {
+      var chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = item.name;
+      bin.querySelector('.stack').appendChild(chip);
+      selected.classList.remove('sel');
+      selected.style.visibility = 'hidden';
+      selected = null;
+      hot(null);
+      placed++;
+      sfx('ok');
+      fx(bin, 'pop');
+      progress.textContent = '已归档 ' + placed + ' ／ 8';
+      note.className = 'note';
+      if (placed < 8) note.textContent = '归档 ' + placed + ' ／ 8。看支点两边谁长，不背例子。';
+      else {
+        stars.save('06', mistakes === 0 ? 3 : (mistakes <= 2 ? 2 : 1));
+        note.textContent = '八件兵器各归其位——读支点、比力臂，比背例子管用。';
+        note.className = 'note good';
+        goNext.hidden = false;
+        sfx('win');
+      }
+    } else {
+      mistakes++;
+      sfx('no');
+      fx(selected, 'shake');
+      note.textContent = item.wrong;
+      note.className = 'note bad';
+    }
+  });
+});
+document.getElementById('hintBtn').addEventListener('click', function () {
+  note.className = 'note';
+  var tips = [
+    '方法：黄点是支点。支点到手/动力近、到重物远＝省力；反之＝费力。',
+    '线索：拿不准就想想用它时的动作——手指挪得多，还是物品动得多？',
+    '答案：省力箱收剪刀、老虎钳、开瓶器、独轮车；其余归费力箱。'
+  ];
+  note.textContent = tips[Math.min(hintIdx, tips.length - 1)];
+  hintIdx++;
+  sfx('tap');
+});
+goNext.addEventListener('click', function () { sfx('tap'); deck('next'); });
+</script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>勾股定理双证记 · 04 · 两块斜边，咔地对上</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #F2F4F6;                      /* 底色 */
+  --surface: #FFFFFF;                 /* 卡片、面板 */
+  --surface-2: #E4E8EC;               /* 凹槽、轨道、未选中的底 */
+  --ink: #14171C;                     /* 主文字 */
+  --ink-2: #4D5560;                   /* 次要文字 */
+  --ink-3: #68717D;                   /* 说明文字 */
+  --line: rgba(20, 23, 28, 0.12);     /* 描边、分隔线 */
+  --accent: #2F5BEA;                  /* 唯一的强调色 */
+  --accent-ink: #FFFFFF;              /* 强调色上面的文字 */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.board { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.board svg { max-height: 100%; width: auto; max-width: 100%; touch-action: none; user-select: none; -webkit-user-select: none; }
+.piece { cursor: grab; }
+.piece.dragging { transition: none; cursor: grabbing; }
+.piece.g { transition: transform 0.3s cubic-bezier(0.3, 1, 0.4, 1); }
+.piece.sel polygon { stroke: var(--accent); }
+.ghost { cursor: pointer; }
+.ghost.hot { stroke: var(--accent) !important; fill: color-mix(in srgb, var(--accent) 10%, transparent) !important; }
+.panel { display: flex; align-items: center; gap: 1rem; }
+.panel .note { flex: 1; margin: 0; }
+.progress { white-space: nowrap; }
+.histbar { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+/* 拼好后的标注淡入 */
+.tag { opacity: 0; transition: opacity 0.6s ease; }
+.tag.show { opacity: 1; }
+#won-outline { stroke: var(--line); }
+.won #won-outline { stroke: var(--accent); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">手稿一 · 加菲尔德，1876</p>
+    <h1 class="in" style="--i:1">两块斜边，咔地对上</h1>
+  </header>
+  <main style="display:flex; flex-direction:column; gap:0.6rem; min-height:0;">
+    <div class="histbar in" style="--i:2">
+      <span class="chip num">1876 · 国会图书馆</span>
+      <span class="chip">众议员 J. A. 加菲尔德</span>
+      <span class="chip">任务：把三块碎片拼成一个直角梯形</span>
+    </div>
+    <figure class="board in" style="--i:3">
+      <svg id="pz" viewBox="0 0 900 540" role="img" aria-label="拼图：三块三角形碎片拼成直角梯形">
+        <path id="won-outline" d="M90 480 L356 480 L356 328 L90 366 Z" fill="none" stroke="var(--ink-3)" stroke-width="3" stroke-dasharray="8 7"/>
+        <g class="ghost" data-slot="1"><polygon points="90,480 242,480 90,366" fill="var(--surface)" stroke="var(--ink-3)" stroke-width="2.5" stroke-dasharray="6 6"/></g>
+        <g class="ghost" data-slot="2"><polygon points="242,480 356,480 356,328" fill="var(--surface)" stroke="var(--ink-3)" stroke-width="2.5" stroke-dasharray="6 6"/></g>
+        <g class="ghost" data-slot="3"><polygon points="90,366 242,480 356,328" fill="var(--surface)" stroke="var(--ink-3)" stroke-width="2.5" stroke-dasharray="6 6"/></g>
+        <g class="piece" id="pc1" data-slot="1"><polygon points="0,0 152,0 0,-114" fill="var(--accent)" fill-opacity="0.16" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/></g>
+        <g class="piece" id="pc2" data-slot="2"><polygon points="0,0 114,0 114,-152" fill="var(--accent)" fill-opacity="0.16" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/></g>
+        <g class="piece" id="pc3" data-slot="3"><polygon points="0,0 152,114 266,-38" fill="var(--accent)" fill-opacity="0.16" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/></g>
+        <g class="tag" id="labels">
+          <text x="72" y="428" text-anchor="end" font-size="17" font-weight="800" fill="var(--accent)">a</text>
+          <text x="374" y="400" font-size="17" font-weight="800" fill="var(--accent)">b</text>
+          <text x="223" y="510" text-anchor="middle" font-size="17" font-weight="800" fill="var(--ink)">a＋b</text>
+          <text x="180" y="410" text-anchor="middle" font-size="17" font-weight="800" fill="var(--ink-2)">c</text>
+          <text x="312" y="396" text-anchor="middle" font-size="17" font-weight="800" fill="var(--ink-2)">c</text>
+        </g>
+        <g class="tag" id="areas">
+          <text x="146" y="444" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink-2)">½ab</text>
+          <text x="316" y="432" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink-2)">½ab</text>
+          <text x="228" y="392" text-anchor="middle" font-size="15" font-weight="700" fill="var(--accent)">½c²</text>
+        </g>
+        <text x="420" y="468" font-size="15" fill="var(--ink-3)">拼成直角梯形：a、b 平行，高是 a＋b</text>
+      </svg>
+    </figure>
+    <div class="panel in" style="--i:4">
+      <span class="chip progress num" id="progress">已归位 0 ／ 3</span>
+      <p class="note" id="note">按住碎片拖到虚线位置；或先点碎片、再点虚线格。三块都要归位。</p>
+      <button class="btn ghost" id="hintBtn">提示</button>
+      <button class="btn" id="goNext" hidden>带着梯形去算账 →</button>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 碎片与归宿（u = 38：a = 114，b = 152，c = 190，底 = a＋b = 266） */
+var PIECES = [
+  { id: 'pc1', slot: '1', home: [70, 190],   target: [90, 480] },
+  { id: 'pc2', slot: '2', home: [340, 200],  target: [242, 480] },
+  { id: 'pc3', slot: '3', home: [560, 125],  target: [90, 366] }
+];
+var HINTS = [
+  '方法：直角三角形两块要贴着梯形的左下和右下，等腰直角那块立在中间、斜边朝右上。',
+  '线索：两块直角三角形的直角，一个在梯形左下角，一个在梯形右下角。',
+  '答案：把每块拖到同形状的虚线格上，虚线会变蓝提醒你。'
+];
+var svg = document.getElementById('pz');
+var note = document.getElementById('note');
+var progress = document.getElementById('progress');
+var goNext = document.getElementById('goNext');
+var placed = 0, done = false, hintIdx = 0;
+var selected = null;
+function xy(evt) {
+  var pt = svg.createSVGPoint(); pt.x = evt.clientX; pt.y = evt.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+function setPos(el, x, y) { el.style.transform = 'translate(' + x + 'px,' + y + 'px)'; }
+function centroid(el, tx, ty) {
+  var pts = el.querySelector('polygon').points;
+  var cx = 0, cy = 0;
+  for (var i = 0; i < pts.numberOfItems; i++) { cx += pts.getItem(i).x; cy += pts.getItem(i).y; }
+  return [cx / pts.numberOfItems + tx, cy / pts.numberOfItems + ty];
+}
+var drag = null;
+PIECES.forEach(function (p) {
+  var el = document.getElementById(p.id);
+  setPos(el, p.home[0], p.home[1]);
+  el.addEventListener('pointerdown', function (e) {
+    if (done) return;
+    e.preventDefault();
+    var pt = xy(e);
+    drag = { p: p, el: el, sx: pt.x, sy: pt.y, ox: p.cur[0], oy: p.cur[1], moved: false };
+    el.classList.add('dragging');
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var pt = xy(e);
+    var dx = pt.x - drag.sx, dy = pt.y - drag.sy;
+    if (!drag.moved && Math.abs(dx) + Math.abs(dy) > 6) drag.moved = true;
+    if (drag.moved) {
+      p.cur = [drag.ox + dx, drag.oy + dy];
+      setPos(el, p.cur[0], p.cur[1]);
+    }
+  });
+  function finish(e) {
+    if (!drag) return;
+    var d = drag; drag = null;
+    el.classList.remove('dragging');
+    if (!d.moved) { toggleSelect(d.p, el); return; }
+    tryPlace(d.p, el);
+  }
+  el.addEventListener('pointerup', finish);
+  el.addEventListener('pointercancel', function () { if (drag) { drag = null; el.classList.remove('dragging'); } });
+});
+function toggleSelect(p, el) {
+  if (selected === p) { selected = null; el.classList.remove('sel'); hotGhost(null); return; }
+  if (selected) document.getElementById(selected.id).classList.remove('sel');
+  selected = p;
+  el.classList.add('sel');
+  sfx('tap');
+  hotGhost(p.slot);
+}
+function hotGhost(slot) {
+  document.querySelectorAll('.ghost').forEach(function (g) {
+    g.classList.toggle('hot', g.dataset.slot === slot);
+  });
+}
+document.querySelectorAll('.ghost').forEach(function (g) {
+  g.addEventListener('click', function () {
+    if (done || !selected) return;
+    var p = selected;
+    selected = null;
+    document.getElementById(p.id).classList.remove('sel');
+    hotGhost(null);
+    tryPlace(p, document.getElementById(p.id));
+  });
+});
+function tryPlace(p, el) {
+  var c = centroid(el, p.cur[0], p.cur[1]);
+  var tc = centroid(el, p.target[0], p.target[1]);
+  var dist = Math.hypot(c[0] - tc[0], c[1] - tc[1]);
+  if (dist < 48) {
+    p.cur = [p.target[0], p.target[1]];
+    el.classList.add('g');
+    setPos(el, p.cur[0], p.cur[1]);
+    placed++;
+    sfx('ok');
+    progress.textContent = '已归位 ' + placed + ' ／ 3';
+    note.className = 'note';
+    if (placed === 1) note.textContent = '第一块卡进去了。虚线的直角梯形，正少这两块斜边和一块「角」。';
+    if (placed === 2) note.textContent = '还剩最后一块。';
+    if (placed === 3) win();
+  } else {
+    sfx('no');
+    fx(el, 'shake');
+    note.textContent = '这一块和这个位置对不上——直角和斜边的朝向得吻合。找它自己的虚线格。';
+    note.className = 'note bad';
+  }
+}
+function win() {
+  done = true;
+  note.textContent = '咔——梯形拼成了！三个三角形的面积加起来，正好是整个梯形的面积。下一页，两边各算一遍。';
+  note.className = 'note good';
+  svg.classList.add('won');
+  document.getElementById('labels').classList.add('show');
+  document.getElementById('areas').classList.add('show');
+  stars.save('04', wrongCount === 0 ? 3 : (wrongCount <= 2 ? 2 : 1));
+  goNext.hidden = false;
+  sfx('win');
+}
+var wrongCount = 0;
+document.getElementById('hintBtn').addEventListener('click', function () {
+  note.className = 'note';
+  note.textContent = HINTS[Math.min(hintIdx, HINTS.length - 1)];
+  hintIdx++;
+  sfx('tap');
+});
+goNext.addEventListener('click', function () { sfx('tap'); deck('next'); });
+/* 记录放错次数（用于记星） */
+PIECES.forEach(function (p) { p.cur = [p.home[0], p.home[1]]; });
+var _tryPlace = tryPlace;
+tryPlace = function (p, el) {
+  var before = placed;
+  var beforeWrong = wrongCount;
+  var c = centroid(el, p.cur[0], p.cur[1]);
+  var tc = centroid(el, p.target[0], p.target[1]);
+  if (Math.hypot(c[0] - tc[0], c[1] - tc[1]) >= 48) wrongCount++;
+  _tryPlace(p, el);
+};
+</script>
+</body>
+</html>

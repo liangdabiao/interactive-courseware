@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>勾股定理双证记 · 03 · 面积证法的三件工具</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #F2F4F6;                      /* 底色 */
+  --surface: #FFFFFF;                 /* 卡片、面板 */
+  --surface-2: #E4E8EC;               /* 凹槽、轨道、未选中的底 */
+  --ink: #14171C;                     /* 主文字 */
+  --ink-2: #4D5560;                   /* 次要文字 */
+  --ink-3: #68717D;                   /* 说明文字 */
+  --line: rgba(20, 23, 28, 0.12);     /* 描边、分隔线 */
+  --accent: #2F5BEA;                  /* 唯一的强调色 */
+  --accent-ink: #FFFFFF;              /* 强调色上面的文字 */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); gap: 2.2rem; min-height: 0; }
+.left { display: flex; flex-direction: column; gap: 1.1rem; min-height: 0; }
+.theorem { font-size: 1.35rem; font-weight: 800; text-align: center; }
+.tools { display: flex; flex-direction: column; gap: 0.9rem; min-height: 0; }
+.tool { display: grid; grid-template-columns: 9.5rem 1fr; gap: 1.1rem; align-items: center; text-align: left;
+  padding: 0.9rem 1.1rem; border-radius: 1rem; background: var(--surface); border: 1.5px solid var(--line);
+  cursor: pointer; transition: border-color 0.2s, transform 0.12s; }
+.tool:hover { border-color: color-mix(in srgb, var(--ink) 30%, transparent); }
+.tool:active { transform: scale(0.985); }
+.tool.lit { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.tool.lit h3 { color: var(--accent); }
+.tool svg { width: 100%; height: auto; }
+.tool .no { display: inline-block; font-size: 0.8rem; font-weight: 700; color: var(--ink-3); letter-spacing: 0.12em; margin-bottom: 0.2em; }
+.foot { display: flex; justify-content: flex-end; align-items: center; gap: 1rem; margin-top: auto; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">手稿共用 · 开档工具</p>
+    <h1 class="in" style="--i:1">面积证法的三件工具</h1>
+  </header>
+  <main class="duo">
+    <div class="left in" style="--i:2">
+      <p class="lead">两份手稿用的是同一套思路：不啃代数，先用<b class="hl">面积</b>说话——把图形摆来摆去，数出它的面积。开档前，先把三件工具擦亮。</p>
+      <div class="theorem card num">直角边 a、b，斜边 c：a² + b² = c²</div>
+      <p class="small">先记住记号：直角三角形两条直角边叫 a 和 b，斜边（直角对面最长那条）叫 c。定理说的就是：两直角边的平方和，等于斜边的平方。</p>
+      <p class="note" id="note"></p>
+      <div class="foot">
+        <button class="btn" id="proceed" hidden>去拆第一份手稿 →</button>
+      </div>
+    </div>
+    <div class="tools">
+      <button class="tool in" style="--i:3" id="t1">
+        <svg viewBox="0 0 150 92" aria-hidden="true">
+          <rect x="14" y="10" width="122" height="72" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
+          <line x1="75" y1="10" x2="75" y2="82" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="5 5"/>
+          <text x="44" y="52" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink-2)">S₁</text>
+          <text x="106" y="52" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink-2)">S₂</text>
+        </svg>
+        <span><span class="no">工具一</span><h3>面积可加性</h3><p class="small">整块面积 = 各块之和，不重不漏。拼起来的图，面积就能拆开算。</p></span>
+      </button>
+      <button class="tool in" style="--i:4" id="t2">
+        <svg viewBox="0 0 150 104" aria-hidden="true">
+          <path d="M14 80 L136 80 L108 16 Z" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
+          <line x1="108" y1="16" x2="108" y2="80" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="5 5"/>
+          <text x="75" y="99" text-anchor="middle" font-size="14" fill="var(--ink-3)">底</text>
+          <text x="114" y="50" font-size="14" fill="var(--accent)">高</text>
+        </svg>
+        <span><span class="no">工具二</span><h3>面积公式</h3><p class="small">三角形 S = ½ × 底 × 高；梯形 S = ½ ×（上底 + 下底）× 高。</p></span>
+      </button>
+      <button class="tool in" style="--i:5" id="t3">
+        <svg viewBox="0 0 150 104" aria-hidden="true">
+          <path d="M18 80 L58 80 L18 40 Z" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
+          <text x="38" y="99" text-anchor="middle" font-size="14" fill="var(--ink-3)">1 份面积</text>
+          <path d="M88 80 L148 80 L88 20 Z" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
+          <line x1="88" y1="50" x2="148" y2="50" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 5"/>
+          <line x1="118" y1="80" x2="118" y2="20" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 5"/>
+          <text x="118" y="99" text-anchor="middle" font-size="14" fill="var(--accent)">4 份面积</text>
+        </svg>
+        <span><span class="no">工具三</span><h3>同形放大</h3><p class="small">形状相同的图形，边长放大几倍，面积就放大「几倍×几倍」。</p></span>
+      </button>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 三件工具：全部点亮后才放行 */
+var lit = 0;
+var note = document.getElementById('note');
+var proceed = document.getElementById('proceed');
+['t1', 't2', 't3'].forEach(function (id) {
+  document.getElementById(id).addEventListener('click', function () {
+    var card = document.getElementById(id);
+    if (card.classList.contains('lit')) return;
+    card.classList.add('lit');
+    sfx('ok');
+    fx(card, 'pop');
+    lit++;
+    if (lit === 1) note.textContent = '第一件：可加性。两份手稿都靠它把图拆开、拼上。';
+    if (lit === 2) note.textContent = '第二件：公式。摆好的图形，面积要算得出来。';
+    if (lit === 3) {
+      note.textContent = '三件工具齐了。第三件「同形放大」是第二份手稿的关键——先记下，马上会用到。';
+      note.className = 'note good';
+      proceed.hidden = false;
+      sfx('win');
+    }
+  });
+});
+proceed.addEventListener('click', function () { sfx('tap'); deck('next'); });
+</script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>勾股定理双证记 · 06 · 三个三角形，一个模子</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #F2F4F6;                      /* 底色 */
+  --surface: #FFFFFF;                 /* 卡片、面板 */
+  --surface-2: #E4E8EC;               /* 凹槽、轨道、未选中的底 */
+  --ink: #14171C;                     /* 主文字 */
+  --ink-2: #4D5560;                   /* 次要文字 */
+  --ink-3: #68717D;                   /* 说明文字 */
+  --line: rgba(20, 23, 28, 0.12);     /* 描边、分隔线 */
+  --accent: #2F5BEA;                  /* 唯一的强调色 */
+  --accent-ink: #FFFFFF;              /* 强调色上面的文字 */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.lab { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+.lab .wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.lab svg { max-height: 100%; width: auto; max-width: 100%; }
+.slider-row { display: flex; align-items: center; gap: 1rem; }
+.slider-row input[type="range"] { flex: 1; accent-color: var(--accent); height: 44px; cursor: pointer; }
+.slider-row .sval { min-width: 6.5em; text-align: right; }
+.panel { display: flex; align-items: center; gap: 1rem; }
+.panel .note { flex: 1; margin: 0; }
+#rep1, #rep2 { transition: transform 0.9s cubic-bezier(0.3, 1, 0.4, 1); }
+#rep1.coin, #rep2.coin { stroke: var(--accent); stroke-width: 4; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">手稿二 · 爱因斯坦，12 岁</p>
+    <h1 class="in" style="--i:1">三个三角形，一个模子</h1>
+  </header>
+  <main class="lab">
+    <div class="histbar in" style="--i:2" style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+      <span class="chip num">1891 · 一张书桌</span>
+      <span class="chip">垂线把大三角形切成两小块</span>
+      <span class="chip">任务：把小块放大，看能不能重合</span>
+    </div>
+    <figure class="wrap in" style="--i:3">
+      <svg id="geo" viewBox="0 0 930 520" role="img" aria-label="同形沙盒：把切出来的小三角形放大，与原三角形重合">
+        <line x1="358" y1="224" x2="358" y2="440" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="6 6"/>
+        <polygon points="70,440 358,224 358,440" fill="var(--accent)" fill-opacity="0.16"/>
+        <polygon points="358,224 358,440 520,440" fill="var(--ink)" fill-opacity="0.1"/>
+        <path d="M70 440 L520 440 L358 224 Z" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M346 428 L358 416 L370 428" fill="none" stroke="var(--ink-3)" stroke-width="2.5"/>
+        <text x="60" y="468" font-size="18" font-weight="800" fill="var(--ink)">A</text>
+        <text x="528" y="468" font-size="18" font-weight="800" fill="var(--ink)">B</text>
+        <text x="352" y="208" text-anchor="middle" font-size="18" font-weight="800" fill="var(--ink)">C</text>
+        <text x="366" y="468" font-size="16" font-weight="700" fill="var(--accent)">D</text>
+        <text x="200" y="316" text-anchor="end" font-size="17" font-weight="800" fill="var(--accent)">b＝360</text>
+        <text x="446" y="330" font-size="17" font-weight="800" fill="var(--ink-2)">a＝270</text>
+        <text x="295" y="468" text-anchor="middle" font-size="17" font-weight="800" fill="var(--ink-2)">c＝450</text>
+        <polygon id="rep1" points="" fill="var(--accent)" fill-opacity="0.4" stroke="var(--ink)" stroke-width="2.5"/>
+        <polygon id="rep2" points="" fill="var(--accent)" fill-opacity="0.4" stroke="var(--ink)" stroke-width="2.5" visibility="hidden"/>
+        <text id="coinLabel" x="0" y="0" text-anchor="middle" font-size="24" font-weight="800" fill="var(--accent)" visibility="hidden">同形！</text>
+      </svg>
+    </figure>
+    <div class="slider-row in" style="--i:4">
+      <span class="chip" id="stageChip">第一块 · △ACD</span>
+      <input type="range" id="scale" min="0.55" max="1.8" step="0.005" value="1">
+      <span class="sval num" id="sval">缩放 1.00</span>
+    </div>
+    <div class="panel in" style="--i:5">
+      <span class="chip num" id="areaChip">复制品面积 3.84 格</span>
+      <p class="note" id="note">这是垂线切出来的左块 △ACD。拖动滑块把它放大——什么时候它能和整个大三角形 △ABC 重合？</p>
+      <button class="btn ghost" id="hintBtn">提示</button>
+      <button class="btn" id="nextBtn" hidden>换第二块试试 →</button>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 沙盒参数（3-4-5，1 格 = 1 面积单位）：△ACD = 3.84 格，△CBD = 2.16 格，△ABC = 6 格 */
+var STAGES = [
+  {
+    which: 'rep1', s0: 3.84, target: 1.25, chip: '第一块 · △ACD',
+    range: [0.55, 1.45],
+    coincideTx: 'matrix(-0.8, 0.6, -0.6, -0.8, 1038, 264)',
+    coinText: { x: 250, y: 180, text: '同形！放大 1.25 倍' },
+    notes: ['这是垂线切出来的左块 △ACD。拖动滑块把它放大——什么时候它能和整个大三角形 △ABC 重合？',
+            '重合需要三条边都对上。复制品的最长边（斜边）是 360，大三角形的最长边是 450。',
+            '答案：450 ÷ 360 ＝ 1.25。就是它！'],
+    done: '重合了！△ACD 放大 1.25 倍就是 △ABC——所以 △ACD 和 △ABC 形状相同。换右块 △CBD 再试一次。'
+  },
+  {
+    which: 'rep2', s0: 2.16, target: 5 / 3, chip: '第二块 · △CBD',
+    range: [0.9, 1.85],
+    coincideTx: 'matrix(0.6, 0.8, 0.8, -0.6, -192, 224)',
+    coinText: { x: 640, y: 150, text: '同形！放大 5/3 倍' },
+    notes: ['右块 △CBD 来了。老规矩：拖滑块，找到能重合的那个缩放。提示：纸片可以翻面。',
+            '这回复制品的斜边是 CB＝270，大三角形的斜边 AB＝450。',
+            '答案：450 ÷ 270 ＝ 5/3 ≈ 1.67。翻个面，严丝合缝。'],
+    done: '两块都能放大成 △ABC——三个三角形同形！同一副模子，面积就有了统一的算法。'
+  }
+];
+var stageIdx = 0, s = 1, missCount = 0, solved = [false, false];
+var slider = document.getElementById('scale');
+var sval = document.getElementById('sval');
+var areaChip = document.getElementById('areaChip');
+var stageChip = document.getElementById('stageChip');
+var note = document.getElementById('note');
+var nextBtn = document.getElementById('nextBtn');
+var coinLabel = document.getElementById('coinLabel');
+var rep = [document.getElementById('rep1'), document.getElementById('rep2')];
+var hintIdx = 0;
+function draw() {
+  var st = STAGES[stageIdx], el = rep[stageIdx];
+  if (stageIdx === 0) {
+    el.setAttribute('points', (880 - 288 * s) + ',440 ' + (880 - 288 * s) + ',' + (440 - 216 * s) + ' 880,440');
+  } else {
+    el.setAttribute('points', (600 - 162 * s) + ',440 ' + (600 - 162 * s) + ',' + (440 - 216 * s) + ' 600,440');
+  }
+  sval.textContent = '缩放 ' + s.toFixed(2);
+  areaChip.textContent = '复制品面积 ' + (st.s0 * s * s).toFixed(2) + ' 格';
+}
+function setStage(i) {
+  stageIdx = i;
+  var st = STAGES[i];
+  stageChip.textContent = st.chip;
+  hintIdx = 0;
+  note.className = 'note';
+  note.textContent = st.notes[0];
+  rep.forEach(function (el, k) { el.setAttribute('visibility', k === i ? 'visible' : 'hidden'); el.classList.remove('coin'); el.style.transform = ''; });
+  coinLabel.setAttribute('visibility', 'hidden');
+  slider.disabled = false;
+  s = 1; slider.value = 1;
+  slider.min = st.range[0]; slider.max = st.range[1];
+  nextBtn.hidden = true;
+  nextBtn.textContent = i === 0 ? '换第二块试试 →' : '去看那本账 →';
+  draw();
+}
+slider.addEventListener('input', function () {
+  if (slider.disabled) return;
+  var st = STAGES[stageIdx];
+  s = parseFloat(slider.value);
+  draw();
+  if (Math.abs(s - st.target) < 0.04) succeed();
+});
+slider.addEventListener('change', function () {
+  if (slider.disabled) return;
+  var st = STAGES[stageIdx];
+  if (Math.abs(s - st.target) >= 0.04) {
+    missCount++;
+    sfx('no');
+    note.textContent = s < st.target ? '还差一点——复制品比大三角形小，再放大些。' : '过了——复制品已经比大三角形还大，往回收。';
+  }
+});
+function succeed() {
+  var st = STAGES[stageIdx];
+  s = st.target;
+  slider.value = s;
+  slider.disabled = true;
+  draw();
+  sfx('ok');
+  var el = rep[stageIdx];
+  setTimeout(function () {
+    el.classList.add('coin');
+    el.style.transform = st.coincideTx;
+    note.textContent = st.done;
+    note.className = 'note good';
+    solved[stageIdx] = true;
+    setTimeout(function () {
+      coinLabel.setAttribute('x', st.coinText.x);
+      coinLabel.setAttribute('y', st.coinText.y);
+      coinLabel.textContent = st.coinText.text;
+      coinLabel.setAttribute('visibility', 'visible');
+      fx(coinLabel, 'pop');
+      sfx(stageIdx === 0 ? 'ok' : 'win');
+      nextBtn.hidden = false;
+    }, 950);
+  }, 250);
+}
+nextBtn.addEventListener('click', function () {
+  sfx('tap');
+  if (stageIdx === 0) setStage(1);
+  else {
+    nextBtn.hidden = true;
+    note.innerHTML = '两个小三角形都成了 △ABC 的「放大版」——这就是爱因斯坦的全部秘密。去看那本面积账。';
+    setTimeout(function () { deck('next'); }, 1600);
+  }
+});
+document.getElementById('hintBtn').addEventListener('click', function () {
+  var st = STAGES[stageIdx];
+  note.className = 'note';
+  note.textContent = st.notes[Math.min(hintIdx, st.notes.length - 1)];
+  hintIdx++;
+  sfx('tap');
+});
+setStage(0);
+</script>
+</body>
+</html>

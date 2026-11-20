@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>勾股定理双证记 · 08 · 鉴定报告</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #F2F4F6;                      /* 底色 */
+  --surface: #FFFFFF;                 /* 卡片、面板 */
+  --surface-2: #E4E8EC;               /* 凹槽、轨道、未选中的底 */
+  --ink: #14171C;                     /* 主文字 */
+  --ink-2: #4D5560;                   /* 次要文字 */
+  --ink-3: #68717D;                   /* 说明文字 */
+  --line: rgba(20, 23, 28, 0.12);     /* 描边、分隔线 */
+  --accent: #2F5BEA;                  /* 唯一的强调色 */
+  --accent-ink: #FFFFFF;              /* 强调色上面的文字 */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.desk { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 1.8rem; min-height: 0; }
+.half { display: flex; flex-direction: column; gap: 0.8rem; min-height: 0; }
+.bins { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+.bin { min-height: 8.2em; border: 1.5px dashed var(--line); border-radius: 1rem; padding: 0.8rem 1rem;
+  display: flex; flex-direction: column; gap: 0.45rem; cursor: pointer; transition: border-color 0.2s; }
+.bin.hot { border-color: var(--accent); }
+.bin.filled { border-style: solid; cursor: default; }
+.bin h3 { font-size: 1.05rem; }
+.bin .who { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.clues { display: flex; flex-direction: column; gap: 0.6rem; }
+.clue { min-height: 3.2em; padding: 0.55em 1.1em; border-radius: 0.9rem; background: var(--surface);
+  border: 1.5px solid var(--line); font-weight: 700; text-align: left; cursor: grab;
+  touch-action: none; user-select: none; -webkit-user-select: none; }
+.clue.sel { border-color: var(--accent); color: var(--accent); }
+.clue.used { visibility: hidden; }
+.ledger { display: flex; flex-direction: column; gap: 0.6rem; min-height: 0; }
+.lrow { display: flex; gap: 0.7em; align-items: baseline; padding: 0.45em 0.7em; border-radius: 0.8rem;
+  background: var(--surface); border: 1.5px solid var(--line); opacity: 0.3; cursor: pointer;
+  transition: opacity 0.35s, transform 0.35s, border-color 0.35s; }
+.lrow.on { opacity: 1; transform: none; }
+.lrow.ok { border-color: var(--accent); }
+.lrow .num { flex: 1; }
+.seal-wrap { position: relative; }
+.seal { position: absolute; right: 1.2rem; top: -1.4rem; transform: rotate(-8deg); opacity: 0; pointer-events: none; }
+.seal.stamped { animation: stamp 0.55s cubic-bezier(0.34, 1.3, 0.64, 1) forwards; }
+@keyframes stamp { from { transform: scale(2.1) rotate(-20deg); opacity: 0; } 60% { transform: scale(0.94) rotate(-6deg); opacity: 1; } to { transform: scale(1) rotate(-8deg); opacity: 1; } }
+.foot { display: flex; gap: 0.8rem; justify-content: flex-end; align-items: center; margin-top: auto; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">挑战 · 终检</p>
+    <h1 class="in" style="--i:1">鉴定报告</h1>
+  </header>
+  <main class="desk">
+    <div class="half in" style="--i:2">
+      <h3>第一步 · 线索归档：点线索，再点它主人</h3>
+      <div class="bins">
+        <div class="bin" id="binG">
+          <h3>加菲尔德</h3>
+          <span class="who">1876 · 众议员 → 总统</span>
+        </div>
+        <div class="bin" id="binE">
+          <h3>爱因斯坦</h3>
+          <span class="who">1891 · 12 岁</span>
+        </div>
+      </div>
+      <div class="clues" id="clues"></div>
+    </div>
+    <div class="half in" style="--i:3">
+      <div class="seal-wrap">
+        <h3>第二步 · 数值终检（3-4-5）</h3>
+        <svg class="seal" id="seal" width="120" height="120" viewBox="0 0 120 120" aria-hidden="true">
+          <circle cx="60" cy="60" r="52" fill="var(--accent)"/>
+          <circle cx="60" cy="60" r="40" fill="none" stroke="var(--accent-ink)" stroke-width="2.5" stroke-dasharray="4 5"/>
+          <text x="60" y="54" text-anchor="middle" font-size="22" font-weight="800" fill="var(--accent-ink)">鉴定</text>
+          <text x="60" y="80" text-anchor="middle" font-size="22" font-weight="800" fill="var(--accent-ink)">完毕</text>
+        </svg>
+      </div>
+      <div class="ledger">
+        <div class="lrow num" id="n1"><span class="chip">梯形账</span><span class="num">6 ＋ 6 ＋ ？ ＝ ½(3＋4)² ＝ 24.5 —— 中间那块 ½c² 是多少？</span></div>
+        <div class="opts" id="n1opts" style="display:flex; gap:0.6rem;">
+          <button class="btn ghost" data-v="12">12</button>
+          <button class="btn ghost" data-v="12.5">12.5</button>
+          <button class="btn ghost" data-v="25">25</button>
+        </div>
+        <div class="lrow num" id="n2"><span class="chip">同形账</span><span class="num">三块面积的「每平方」单价 k，分别是多少？</span></div>
+        <div class="lrow num" id="n3" hidden><span class="chip">结论</span><span class="num hl">两份手稿，同一个定理。归档！</span></div>
+      </div>
+      <p class="note" id="note">先归档线索；然后点「同形账」逐条验算；两检全过就盖章。</p>
+      <div class="foot">
+        <button class="btn ghost" id="hintBtn">提示</button>
+        <button class="btn" id="stampBtn" disabled>盖章归档</button>
+        <button class="btn ghost" id="againBtn" hidden>再来一次</button>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 线索卡与归属（w: 0 = 加菲尔德，1 = 爱因斯坦） */
+var CLUES = [
+  { text: '梯形面积公式撑起全篇', w: 0, why: '梯形公式是加菲尔德手稿的支柱——爱因斯坦那本账靠的是「同形放大」。' },
+  { text: '一把垂线，同形放大', w: 1, why: '加菲尔德靠两块全等三角形拼梯形——「同形」是爱因斯坦的钥匙。' },
+  { text: '1876 · 国会图书馆的草稿纸', w: 0, why: '1876 年是加菲尔德在国会图书馆的年份；爱因斯坦那页写在 1891 年的书桌前。' },
+  { text: '12 岁的书桌', w: 1, why: '12 岁的是爱因斯坦——加菲尔德那年可不小了。' }
+];
+var HINTS = [
+  '方法：先点线索卡选中它，再点它主人的档案盒。',
+  '线索：两份手稿的支柱——一个靠「拼」，一个靠「同形」。年份各归各。',
+  '答案：梯形公式和 1876 归加菲尔德；同形放大和 12 岁归爱因斯坦。'
+];
+var clueBox = document.getElementById('clues');
+var note = document.getElementById('note');
+var stampBtn = document.getElementById('stampBtn');
+var againBtn = document.getElementById('againBtn');
+var hintBtn = document.getElementById('hintBtn');
+var placedClues = 0, n1ok = false, n2ok = false, mistakes = 0, hintIdx = 0, stamped = false;
+function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+var selected = null;
+function buildClues() {
+  clueBox.innerHTML = '';
+  selected = null;
+  shuffle(CLUES.map(function (c, i) { return i; })).forEach(function (ci) {
+    var b = document.createElement('button');
+    b.className = 'clue';
+    b.textContent = CLUES[ci].text;
+    b.dataset.ci = ci;
+    clueBox.appendChild(b);
+    b.addEventListener('click', function () {
+      if (b.classList.contains('used')) return;
+      if (selected === b) { b.classList.remove('sel'); selected = null; hot(null); return; }
+      if (selected) selected.classList.remove('sel');
+      selected = b;
+      b.classList.add('sel');
+      sfx('tap');
+      hot(-1);
+    });
+  });
+}
+function hot(w) {
+  document.getElementById('binG').classList.toggle('hot', selected !== null && w !== 1);
+  document.getElementById('binE').classList.toggle('hot', selected !== null && w !== 0);
+}
+var binG = document.getElementById('binG');
+var binE = document.getElementById('binE');
+[binG, binE].forEach(function (bin) {
+  bin.addEventListener('click', function () {
+    if (!selected) return;
+    var ci = Number(selected.dataset.ci);
+    var c = CLUES[ci];
+    var w = bin === binG ? 0 : 1;
+    if (c.w === w) {
+      var chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = c.text;
+      bin.appendChild(chip);
+      selected.classList.add('used');
+      selected.classList.remove('sel');
+      selected = null;
+      hot(null);
+      placedClues++;
+      sfx('ok');
+      fx(bin, 'pop');
+      note.className = 'note';
+      if (placedClues < 4) note.textContent = '归档 ' + placedClues + ' ／ 4。';
+      else { note.textContent = '线索归档完毕。转数值终检——'; checkReady(); }
+    } else {
+      mistakes++;
+      sfx('no');
+      fx(bin, 'shake');
+      note.textContent = c.why;
+      note.className = 'note bad';
+    }
+  });
+});
+var N1_WRONG = {
+  '12': '那是 ½×24——c² 是 25，不是 24。',
+  '25': '25 是 c² 本身，别忘了还要乘 ½。'
+};
+document.querySelectorAll('#n1opts .btn').forEach(function (b) {
+  b.addEventListener('click', function () {
+    if (n1ok) return;
+    if (b.dataset.v === '12.5') {
+      n1ok = true;
+      sfx('ok');
+      b.classList.remove('ghost');
+      b.style.background = 'var(--accent)';
+      b.style.color = 'var(--accent-ink)';
+      fx(b, 'pop');
+      var row = document.getElementById('n1');
+      row.classList.add('on', 'ok');
+      row.querySelector('.num').textContent = '6 ＋ 6 ＋ 12.5 ＝ 24.5 ✓ 梯形账两行相符。';
+      checkReady();
+    } else {
+      mistakes++;
+      sfx('no');
+      fx(b, 'shake');
+      b.disabled = true;
+      note.textContent = N1_WRONG[b.dataset.v];
+      note.className = 'note bad';
+    }
+  });
+});
+var N2_STEPS = [
+  '△CBD：2.16 ÷ 3² ＝ 2.16 ÷ 9 ＝ 0.24',
+  '△ACD：3.84 ÷ 4² ＝ 3.84 ÷ 16 ＝ 0.24',
+  '△ABC：6 ÷ 5² ＝ 6 ÷ 25 ＝ 0.24 ✓ 同一个 k，三处相等——「同形」坐实。'
+];
+var n2step = 0;
+function n2next() {
+  if (n2ok) return;
+  var row = document.getElementById('n2');
+  if (n2step === 0) {
+    row.classList.add('on');
+  } else if (n2step === 3) {
+    n2ok = true;
+    row.classList.add('ok');
+    row.querySelector('.num').textContent = 'k ＝ 0.24，三处相等。';
+    sfx('ok');
+    checkReady();
+    return;
+  } else {
+    var div = document.createElement('div');
+    div.className = 'lrow num on';
+    div.innerHTML = '<span class="chip">验算 ' + n2step + '</span><span class="num">' + N2_STEPS[n2step] + '</span>';
+    row.parentNode.appendChild(div);
+  }
+  if (n2step === 0) sfx('tap');
+  else sfx('ok');
+  n2step++;
+}
+document.getElementById('n2').addEventListener('click', n2next);
+function checkReady() {
+  if (placedClues === 4 && n1ok && n2ok) {
+    note.textContent = '两项终检全过——盖章归档。';
+    note.className = 'note good';
+    stampBtn.disabled = false;
+  }
+}
+stampBtn.addEventListener('click', function () {
+  stamped = true;
+  sfx('win');
+  document.getElementById('seal').classList.add('stamped');
+  var n = mistakes === 0 ? 3 : (mistakes <= 2 ? 2 : 1);
+  stars.save('08', n);
+  stampBtn.hidden = true;
+  againBtn.hidden = false;
+  note.innerHTML = '判词：<b class="hl">一条定理，两种证法，一样成立。</b>你为本案拿下 <b class="num">' + n + '</b> 颗星。';
+  note.className = 'note good';
+});
+againBtn.addEventListener('click', function () {
+  sfx('tap');
+  location.reload();
+});
+hintBtn.addEventListener('click', function () {
+  note.className = 'note';
+  note.textContent = HINTS[Math.min(hintIdx, HINTS.length - 1)];
+  hintIdx++;
+  sfx('tap');
+});
+document.getElementById('n1').addEventListener('click', function () { this.classList.add('on'); });
+buildClues();
+</script>
+</body>
+</html>

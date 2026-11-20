@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>阿基米德的机械房 · 09 · 把战船拖上岸</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #000000;                      /* 底色 */
+  --surface: #131313;                 /* 卡片、面板 */
+  --surface-2: #222222;               /* 凹槽、轨道、未选中的底 */
+  --ink: #FFFFFF;                     /* 主文字 */
+  --ink-2: #B9B9B9;                   /* 次要文字 */
+  --ink-3: #7C7C7C;                   /* 说明文字 */
+  --line: rgba(255, 255, 255, 0.14);  /* 描边、分隔线 */
+  --accent: #FFD23F;                  /* 唯一的强调色 */
+  --accent-ink: #1A1400;              /* 强调色上面的文字 */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.lab { display: flex; flex-direction: column; gap: 0.8rem; min-height: 0; flex: 1; }
+.optrow { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+.optrow .btn { min-width: 8em; }
+.sea-fig { flex: 1; min-height: 0; display: flex; align-items: flex-end; justify-content: center; }
+.sea-fig svg { max-height: 100%; width: auto; max-width: 100%; }
+.ship { transition: transform 2.2s cubic-bezier(0.3, 0.9, 0.3, 1); }
+.cable-taut { transition: opacity 1.5s; }
+.foot { display: flex; gap: 0.8rem; justify-content: flex-end; align-items: center; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">挑战 · 终局</p>
+    <h1 class="in" style="--i:1">把战船拖上岸</h1>
+  </header>
+  <main class="lab">
+    <span class="chip num in" style="--i:2" id="stageChip">第一关 · 单级滑轮组</span>
+    <p class="lead in" style="--i:3" id="qtext">滑轮组吊 G物＝400N 的货（G动＝40N）。要把拉力控制在 150N 以内，<b class="hl">至少</b>要几段承重绳？</p>
+    <div class="optrow in" style="--i:4" id="optrow"></div>
+    <p class="note in" style="--i:5" id="note">用机房里练的手艺：先算 F＝(G物＋G动)÷n，再挑答案。</p>
+    <figure class="sea-fig in" style="--i:6">
+      <svg viewBox="0 0 900 300" role="img" aria-label="海边：滑轮组塔与战船">
+        <rect x="0" y="236" width="900" height="64" fill="var(--surface-2)"/>
+        <path d="M0 236 q 60 -10 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0" fill="none" stroke="var(--ink-3)" stroke-width="2.5"/>
+        <g id="ship" class="ship">
+          <path d="M120 196 L330 196 L300 232 L150 232 Z" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <line x1="225" y1="196" x2="225" y2="128" stroke="var(--ink)" stroke-width="3"/>
+          <path d="M225 132 L286 150 L225 168 Z" fill="var(--accent)"/>
+          <text x="120" y="186" font-size="14" fill="var(--ink-3)">战船 · G＝4×10⁵N</text>
+        </g>
+        <g id="tower">
+          <rect x="700" y="96" width="26" height="140" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <circle cx="713" cy="112" r="16" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3"/>
+          <circle cx="713" cy="168" r="16" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3"/>
+          <path id="cable" d="M330 190 Q 520 240 688 186" fill="none" stroke="var(--ink-2)" stroke-width="3" stroke-dasharray="9 8"/>
+          <g id="man">
+            <circle cx="640" cy="212" r="9" fill="var(--ink)"/>
+            <line x1="640" y1="221" x2="640" y2="248" stroke="var(--ink)" stroke-width="3.5"/>
+            <line x1="640" y1="230" x2="662" y2="226" stroke="var(--ink)" stroke-width="3.5"/>
+            <line x1="640" y1="248" x2="630" y2="268" stroke="var(--ink)" stroke-width="3.5"/>
+            <line x1="640" y1="248" x2="650" y2="268" stroke="var(--ink)" stroke-width="3.5"/>
+            <text x="600" y="292" font-size="14" fill="var(--ink-3)">学徒 · 最多 400N</text>
+          </g>
+        </g>
+        <text id="verdict" x="450" y="60" text-anchor="middle" font-size="24" font-weight="800" fill="var(--accent)" opacity="0">船动了！</text>
+      </svg>
+    </figure>
+    <div class="foot in" style="--i:7">
+      <button class="btn ghost" id="hintBtn">提示</button>
+      <button class="btn" id="haulBtn" hidden>起拖！</button>
+      <button class="btn ghost" id="againBtn" hidden>再来一次</button>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 三关递进：单级选段数 → 两级相乘 → 三级拖真船 */
+var STAGES = [
+  {
+    chip: '第一关 · 单级滑轮组',
+    q: '滑轮组吊 G物＝400N 的货（G动＝40N）。要把拉力控制在 150N 以内，<b class="hl">至少</b>要几段承重绳？',
+    opts: ['2 段', '3 段', '4 段'], ok: 1,
+    why: ['2 段：F＝(400＋40)÷2＝220N，超出 150N。', null, '4 段当然也够（110N）——但题目问的是「至少」。'],
+    okText: '3 段：F＝440÷3＝147N≤150N ✓。单级滑轮组毕业了。'
+  },
+  {
+    chip: '第二关 · 两级相乘',
+    q: '闸门 G＝5000N。手头只有每级<b class="hl">省 5 倍</b>的滑轮组，串联<b class="hl">两级</b>。末端拉力是多少？',
+    opts: ['40N', '200N', '1000N'], ok: 1,
+    why: ['40N 是除以 125 的账——那是三级。', null, '1000N 只除了 5 倍——第二级还没干活呢。'],
+    okText: '倍数相乘：5×5＝25，F＝5000÷25＝200N。两个「不怎么样」连起来，就很了不起。'
+  },
+  {
+    chip: '第三关 · 终局拖船',
+    q: '战船 G＝4×10⁵ N（约 40 吨），学徒最多拉 <b class="hl">400N</b>。三级滑轮组、每级省 <b class="hl">10 倍</b>——总倍数是多少？',
+    opts: ['100 倍', '1000 倍', '10000 倍'], ok: 1,
+    why: ['100 倍：F＝4000N，还是拖不动。', null, '10000 倍：那 F 只有 40N——账本要老实。'],
+    okText: '10×10×10＝1000 倍，F＝4×10⁵ ÷ 1000＝400N——恰好是你手臂的极限！'
+  }
+];
+var stageIdx = 0, mistakes = 0, hintIdx = 0;
+var note = document.getElementById('note');
+var qtext = document.getElementById('qtext');
+var stageChip = document.getElementById('stageChip');
+var optrow = document.getElementById('optrow');
+var haulBtn = document.getElementById('haulBtn');
+var againBtn = document.getElementById('againBtn');
+var hintBtn = document.getElementById('hintBtn');
+function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function buildOpts() {
+  var st = STAGES[stageIdx];
+  optrow.innerHTML = '';
+  var order = shuffle(st.opts.map(function (o, i) { return i; }));
+  order.forEach(function (oi) {
+    var b = document.createElement('button');
+    b.className = 'btn ghost';
+    b.textContent = st.opts[oi];
+    b.addEventListener('click', function () {
+      if (oi === st.ok) {
+        sfx('ok');
+        b.classList.remove('ghost');
+        b.classList.add('right');
+        fx(b, 'pop');
+        note.textContent = st.okText;
+        note.className = 'note good';
+        afterOk();
+      } else {
+        mistakes++;
+        sfx('no');
+        b.disabled = true;
+        fx(b, 'shake');
+        note.textContent = st.why[oi];
+        note.className = 'note bad';
+      }
+    });
+    optrow.appendChild(b);
+  });
+}
+function afterOk() {
+  if (stageIdx === 2) {
+    haulBtn.hidden = false;
+    haulBtn.textContent = '起拖！';
+  } else {
+    stageIdx++;
+    var st = STAGES[stageIdx];
+    stageChip.textContent = st.chip;
+    qtext.innerHTML = st.q;
+    buildOpts();
+  }
+}
+haulBtn.addEventListener('click', function () {
+  sfx('win');
+  document.getElementById('cable').style.opacity = '1';
+  document.getElementById('cable').classList.remove('cable-taut');
+  document.getElementById('ship').style.transform = 'translate(-36px, -30px)';
+  var v = document.getElementById('verdict');
+  v.style.opacity = 1;
+  fx(v, 'pop');
+  var n = mistakes === 0 ? 3 : (mistakes <= 2 ? 2 : 1);
+  stars.save('09', n);
+  note.innerHTML = '判词：传说成立。不是神力，是<b class="hl">一千倍的心思</b>——每一级都在替你省力。你为本案拿下 <b class="num">' + n + '</b> 颗星。';
+  note.className = 'note good';
+  haulBtn.hidden = true;
+  againBtn.hidden = false;
+});
+againBtn.addEventListener('click', function () {
+  sfx('tap');
+  mistakes = 0; stageIdx = 0; hintIdx = 0;
+  document.getElementById('ship').style.transform = '';
+  var v = document.getElementById('verdict');
+  v.style.opacity = 0;
+  againBtn.hidden = true;
+  haulBtn.hidden = true;
+  var st = STAGES[0];
+  stageChip.textContent = st.chip;
+  qtext.innerHTML = st.q;
+  buildOpts();
+  note.className = 'note';
+  note.textContent = '用机房里练的手艺：先算 F＝(G物＋G动)÷n，再挑答案。';
+});
+hintBtn.addEventListener('click', function () {
+  var tips = [
+    '方法：先算 F＝(G物＋G动)÷n，跟 150N 比一比。',
+    '线索：多级滑轮组的倍数是「相乘」不是「相加」。',
+    '答案：三关的答案依次是 3 段、200N、1000 倍。'
+  ];
+  note.className = 'note';
+  note.textContent = tips[Math.min(hintIdx, tips.length - 1)];
+  hintIdx++;
+  sfx('tap');
+});
+buildOpts();
+</script>
+</body>
+</html>

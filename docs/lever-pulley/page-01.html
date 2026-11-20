@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>阿基米德的机械房 · 01 · 机械房</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #000000;                      /* 底色 */
+  --surface: #131313;                 /* 卡片、面板 */
+  --surface-2: #222222;               /* 凹槽、轨道、未选中的底 */
+  --ink: #FFFFFF;                     /* 主文字 */
+  --ink-2: #B9B9B9;                   /* 次要文字 */
+  --ink-3: #7C7C7C;                   /* 说明文字 */
+  --line: rgba(255, 255, 255, 0.14);  /* 描边、分隔线 */
+  --accent: #FFD23F;                  /* 唯一的强调色 */
+  --accent-ink: #1A1400;              /* 强调色上面的文字 */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.stage > header { text-align: center; }
+.cover { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem; text-align: center; }
+.cover .lead { margin: 0 auto; }
+.hero { width: min(44rem, 78%); }
+.hero svg { width: 100%; height: auto; }
+.quote { font-size: 1.4rem; font-weight: 800; color: var(--accent); letter-spacing: 0.04em; }
+.draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: drawline 0.9s ease forwards; animation-delay: calc(var(--d, 0) * 1s); }
+@keyframes drawline { to { stroke-dashoffset: 0; } }
+.badges { display: flex; gap: 0.9rem; flex-wrap: wrap; justify-content: center; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">阿基米德系列 · 第二间房</p>
+    <h1 class="in" style="--i:1">机械房</h1>
+  </header>
+  <main class="cover">
+    <figure class="hero in" style="--i:2">
+      <svg viewBox="0 0 560 300" role="img" aria-label="一根撬棍支起地球">
+        <circle cx="440" cy="196" r="62" fill="var(--surface)" stroke="var(--ink)" stroke-width="5"/>
+        <path d="M395 172 q 24 -14 52 -8 M420 250 q 20 6 42 -4 M486 172 q 10 22 2 44" fill="none" stroke="var(--ink-3)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M60 236 L468 208" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" pathLength="1" class="draw" style="--d:0"/>
+        <path d="M398 240 L438 240 L418 214 Z" fill="var(--accent)" pathLength="1" class="draw" style="--d:1"/>
+        <line x1="30" y1="240" x2="530" y2="240" stroke="var(--ink)" stroke-width="3" pathLength="1" class="draw" style="--d:1"/>
+        <path d="M92 208 q -18 12 -8 28" fill="none" stroke="var(--ink-2)" stroke-width="4" stroke-linecap="round" pathLength="1" class="draw" style="--d:2"/>
+        <text x="70" y="196" font-size="20" font-weight="800" fill="var(--ink-2)">手按这里</text>
+        <text x="470" y="286" text-anchor="end" font-size="18" fill="var(--ink-3)">地球？先从一艘船开始</text>
+      </svg>
+    </figure>
+    <p class="quote in" style="--i:3">「给我一个支点，我能撬动地球。」</p>
+    <p class="lead in" style="--i:4">上次，我们开了他为王冠设的悬案。这次进第二间房——<b class="hl">机械房</b>：撬棍、轮子、绳子，和一句狂言的账本。</p>
+    <div class="badges in" style="--i:5">
+      <span class="chip num">手稿一 · 杠杆</span>
+      <span class="chip num">手稿二 · 滑轮与滑轮组</span>
+      <span class="chip num">终局 · 拖动战船</span>
+    </div>
+    <button class="btn in" style="--i:6" id="start">推门进房</button>
+    <p class="small num in" style="--i:7">共 10 页 · 约 40 分钟 · ← → 翻页</p>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+/* 封面：只负责开门 */
+document.getElementById('start').addEventListener('click', function () {
+  sfx('ok');
+  deck('next');
+});
+</script>
+</body>
+</html>

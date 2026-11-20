@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>阿基米德的机械房 · 07 · 一只轮子的两种脾气</title>
+<style>
+/* ========== 一、配色：蓝图里选定的那一组，整套课件每一页完全一样 ========== */
+:root {
+  --bg: #000000;                      /* 底色 */
+  --surface: #131313;                 /* 卡片、面板 */
+  --surface-2: #222222;               /* 凹槽、轨道、未选中的底 */
+  --ink: #FFFFFF;                     /* 主文字 */
+  --ink-2: #B9B9B9;                   /* 次要文字 */
+  --ink-3: #7C7C7C;                   /* 说明文字 */
+  --line: rgba(255, 255, 255, 0.14);  /* 描边、分隔线 */
+  --accent: #FFD23F;                  /* 唯一的强调色 */
+  --accent-ink: #1A1400;              /* 强调色上面的文字 */
+}
+/* ========== 二、骨架和部件：每一页完全一样，不要改 ========== */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: clamp(16px, calc(min(1vw, 1.78vh) * 1.12), 34px); }   /* 1rem 跟着屏幕等比缩放，1080p 下约 21px。尺寸都用 rem 写 */
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-size: 1rem; line-height: 1.7; overflow: hidden;
+  font-family: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1 { font-size: 3rem; line-height: 1.15; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 2rem; line-height: 1.2; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+button { font: inherit; color: inherit; }
+svg { display: block; max-width: 100%; }
+/* 舞台：占满整屏。内容区 main 吃掉标题以下的全部空间 */
+.stage { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 1.2rem;
+  padding: clamp(20px, 4.5vh, 64px) clamp(20px, 5vw, 110px) clamp(16px, 3vh, 44px); }
+.stage > main { flex: 1; min-height: 0; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.lead { font-size: 1.25rem; color: var(--ink-2); max-width: 30em; }
+.small { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.hl { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5em; min-height: 52px; padding: 0.5em 1.6em;
+  border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--surface); border-radius: 1rem; padding: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 0.4em; padding: 0.15em 0.8em; border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: max(0.8rem, 14px); font-weight: 600; white-space: nowrap; }
+/* 反馈区：固定放在页面里的一行，不用弹窗。对 = 强调色加对勾；错 = 文字说明加抖动，不用红色 */
+.note { min-height: 3.4em; color: var(--ink-2); }
+.note.good { color: var(--accent); }
+.note.bad { color: var(--ink); }
+.shake { animation: shake 0.32s linear; }
+.pop { animation: pop 0.36s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes shake { 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes pop { 50% { transform: scale(1.14); } }
+/* 入场：给元素加 class="in"，再用 style="--i:1" 排先后 */
+.in { animation: in 0.56s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: calc(var(--i, 0) * 80ms + 100ms); }
+@keyframes in { from { opacity: 0; transform: translateY(1.2rem); } }
+/* 小屏：改成可以上下滚动的单列 */
+@media (max-width: 720px) {
+  body { overflow: auto; }
+  .stage { height: auto; min-height: 100dvh; }
+  h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+/* ========== 三、本页样式：只有这一段每页不同 ========== */
+[hidden] { display: none !important; }
+.panels { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; flex: 1; min-height: 0; }
+.panel { background: var(--surface); border-radius: 1.2rem; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.5rem;
+  opacity: 0.3; transition: opacity 0.4s; }
+.panel.on { opacity: 1; }
+.panel svg { flex: 1; min-height: 0; max-height: 100%; width: auto; max-width: 100%; margin: 0 auto; }
+.panel h3 { display: flex; align-items: baseline; gap: 0.6em; }
+.panel h3 .num { font-size: 0.9rem; color: var(--accent); }
+.panel .say { font-size: max(0.8rem, 14px); color: var(--ink-3); }
+.bill { display: flex; flex-direction: column; gap: 0.5rem; }
+.brow { display: flex; gap: 0.7em; align-items: baseline; padding: 0.42em 0.7em; border-radius: 0.8rem;
+  background: var(--surface); border: 1.5px solid var(--line); opacity: 0.25;
+  transition: opacity 0.35s, transform 0.35s, border-color 0.35s; }
+.brow.on { opacity: 1; transform: none; }
+.brow.ok { border-color: var(--accent); }
+.brow .chip { flex: none; }
+.foot { display: flex; justify-content: flex-end; margin-top: auto; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <p class="kicker in">手稿二 · 滑轮</p>
+    <h1 class="in" style="--i:1">一只轮子的两种脾气</h1>
+  </header>
+  <main style="display:flex; flex-direction:column; gap:1rem; min-height:0;">
+    <p class="lead in" style="--i:2">滑轮就是穿了绳子的轮子。但<b class="hl">轴装在哪</b>，脾气完全不同——定滑轮老实，动滑轮讨巧。秘诀还是那句话：看它的<b class="hl">杠杆臂</b>。</p>
+    <div class="panels">
+      <div class="panel in" style="--i:3" id="pFixed">
+        <h3>定滑轮 <span class="num">轴固定不动 · 等臂杠杆</span></h3>
+        <svg viewBox="0 0 320 250" role="img" aria-label="定滑轮：两臂都是半径">
+          <line x1="60" y1="34" x2="260" y2="34" stroke="var(--ink)" stroke-width="4"/>
+          <line x1="116" y1="34" x2="116" y2="92" stroke="var(--ink-3)" stroke-width="2"/>
+          <line x1="204" y1="34" x2="204" y2="92" stroke="var(--ink-3)" stroke-width="2"/>
+          <circle cx="160" cy="92" r="44" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="4"/>
+          <circle cx="160" cy="92" r="6" fill="var(--accent)"/>
+          <line x1="116" y1="90" x2="116" y2="216" stroke="var(--ink)" stroke-width="3"/>
+          <line x1="204" y1="90" x2="204" y2="216" stroke="var(--ink)" stroke-width="3"/>
+          <rect x="94" y="216" width="44" height="30" rx="6" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
+          <text x="116" y="264" text-anchor="middle" font-size="14" fill="var(--ink-2)">G＝400N</text>
+          <polygon points="204,150 195,168 213,168" fill="var(--accent)"/>
+          <text x="216" y="166" font-size="15" font-weight="800" fill="var(--accent)">F＝400N</text>
+          <g id="fxR1" opacity="0">
+            <line x1="116" y1="92" x2="204" y2="92" stroke="var(--accent)" stroke-width="3" stroke-dasharray="7 6"/>
+            <text x="160" y="76" text-anchor="middle" font-size="15" font-weight="800" fill="var(--accent)">L₁＝R　L₂＝R</text>
+          </g>
+        </svg>
+        <p class="say" id="say1">脾气：只帮你改变用力的方向，一点不省力。</p>
+      </div>
+      <div class="panel in" style="--i:4" id="pMove">
+        <h3>动滑轮 <span class="num">轴跟着货走 · 动力臂＝2R</span></h3>
+        <svg viewBox="0 0 320 250" role="img" aria-label="动滑轮：动力臂是直径">
+          <line x1="60" y1="34" x2="260" y2="34" stroke="var(--ink)" stroke-width="4"/>
+          <line x1="116" y1="34" x2="116" y2="122" stroke="var(--ink)" stroke-width="3"/>
+          <line x1="204" y1="34" x2="204" y2="122" stroke="var(--ink)" stroke-width="3"/>
+          <circle cx="160" cy="122" r="44" fill="var(--accent)" fill-opacity="0.22" stroke="var(--accent)" stroke-width="4"/>
+          <circle cx="160" cy="122" r="6" fill="var(--accent)"/>
+          <line x1="160" y1="128" x2="160" y2="196" stroke="var(--ink)" stroke-width="3"/>
+          <rect x="138" y="196" width="44" height="30" rx="6" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
+          <text x="160" y="244" text-anchor="middle" font-size="14" fill="var(--ink-2)">G＝400N</text>
+          <line x1="204" y1="108" x2="204" y2="58" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/>
+          <polygon points="204,44 194,62 214,62" fill="var(--accent)"/>
+          <text x="218" y="66" font-size="15" font-weight="800" fill="var(--accent)">F＝200N</text>
+          <g id="fxR2" opacity="0">
+            <line x1="116" y1="122" x2="204" y2="122" stroke="var(--accent)" stroke-width="3" stroke-dasharray="7 6"/>
+            <text x="160" y="106" text-anchor="middle" font-size="15" font-weight="800" fill="var(--accent)">动力臂＝2R　阻力臂＝R</text>
+          </g>
+        </svg>
+        <p class="say" id="say2">脾气：省一半力，代价是绳子要多拉一倍的路。</p>
+      </div>
+    </div>
+    <div class="bill">
+      <div class="brow" id="b1"><span class="chip">定滑轮</span><span>不省力（F＝G）· 改变方向 · s＝h —— 本质是等臂杠杆</span></div>
+      <div class="brow" id="b2"><span class="chip">动滑轮</span><span>省一半（F＝G/2）· 不转向 · s＝2h —— 动力臂是阻力臂的两倍</span></div>
+      <div class="brow" id="b3"><span class="chip">下一页</span><span>定滑轮管转向，动滑轮管省力——把它们捆在一起，就是滑轮组</span></div>
+    </div>
+    <p class="note in" style="--i:5" id="note">先把左边这位老实人看明白。</p>
+    <div class="foot in" style="--i:6">
+      <button class="btn in" style="--i:7" id="mainBtn">转动定滑轮的杠杆</button>
+    </div>
+  </main>
+</div>
+<script>
+/* ========== 公共脚本：每一页完全一样，不要改 ========== */
+/* 翻页：页面在播放器里时，把翻页相关的按键交给播放器。页面里想主动翻页，调用 deck('next')。 */
+function deck(cmd, index) { if (parent !== window) parent.postMessage({ deck: cmd, index: index }, '*'); }
+addEventListener('keydown', function (e) {
+  if (parent === window || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (/^(ArrowLeft|ArrowRight|PageUp|PageDown|Home|End|Escape|g|G|f|F|m|M)$/.test(e.key)) parent.postMessage({ deck: 'key', key: e.key }, '*');
+});
+/* 音效：sfx('tap') 点击，sfx('ok') 正确，sfx('no') 错误，sfx('win') 过关。播放器静音时自动不响。 */
+var deckMuted = false, deckAudio = null;
+try { deckMuted = localStorage.getItem('deck:muted') === '1'; } catch (e) {}
+addEventListener('message', function (e) { if (e.data && e.data.deck === 'mute') deckMuted = !!e.data.muted; });
+function sfx(name) {
+  if (deckMuted) return;
+  try {
+    deckAudio = deckAudio || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = { tap: [[740, 0, 0.05]], ok: [[660, 0, 0.12], [990, 0.09, 0.2]], no: [[220, 0, 0.22]], win: [[523, 0, 0.25], [659, 0.09, 0.25], [784, 0.18, 0.25], [1047, 0.27, 0.5]] }[name] || [];
+    notes.forEach(function (n) {
+      var o = deckAudio.createOscillator(), g = deckAudio.createGain(), t = deckAudio.currentTime + n[1];
+      o.type = name === 'no' ? 'sine' : 'triangle'; o.frequency.value = n[0];
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + n[2]);
+      o.connect(g); g.connect(deckAudio.destination); o.start(t); o.stop(t + n[2] + 0.03);
+    });
+  } catch (e) {}
+}
+/* 星星：stars.save('07', 3) 记下第 7 页得了 3 颗；stars.total() 读全课累计。同一页重玩只留最高分。 */
+var stars = {
+  key: 'deck:stars:' + document.title.split('·')[0].trim(),
+  all: function () { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { return {}; } },
+  save: function (page, n) { var a = this.all(); a[page] = Math.max(a[page] || 0, n); try { localStorage.setItem(this.key, JSON.stringify(a)); } catch (e) {} },
+  total: function () { var a = this.all(), t = 0; for (var k in a) t += a[k]; return t; }
+};
+/* 动一下：fx(元素, 'shake') 答错时抖一抖，fx(元素, 'pop') 答对时弹一下 */
+function fx(el, name) { el.classList.remove(name); void el.offsetWidth; el.classList.add(name); }
+</script>
+<script>
+/* ========== 本页脚本：内容数据写在最上面，逻辑写在下面 ========== */
+var NOTE_TEXT = [
+  '定滑轮的轴是支点，两段绳都是半径——两臂相等。所以它不省力：F＝G＝400 N。它只做一件事：让你站着往下拉，比踮脚往上拽舒服。',
+  '动滑轮的轴挂在货上：阻力压在轴上，阻力臂是半径 R；你的绳子在轮沿，动力臂是直径 2R。臂长一比二——省一半，F＝G/2＝200 N。',
+  '代价在绳子上：货升 1 米，你要拉 2 米绳（s＝2h）。两页账并排一摆——该合体了。'
+];
+var stage = 0;
+var note = document.getElementById('note');
+var mainBtn = document.getElementById('mainBtn');
+var LABELS = ['再看讨巧的动滑轮', '摆出对比账单', '账单读完了，去滑轮组机房 →'];
+function setStage(n) {
+  if (n <= stage) return;
+  stage = n;
+  if (n === 1) {
+    document.getElementById('pFixed').classList.add('on');
+    document.getElementById('fxR1').style.opacity = 1;
+    document.getElementById('b1').classList.add('on', 'ok');
+    note.textContent = NOTE_TEXT[0];
+    mainBtn.textContent = LABELS[0];
+    sfx('tap');
+  } else if (n === 2) {
+    document.getElementById('pMove').classList.add('on');
+    document.getElementById('fxR2').style.opacity = 1;
+    document.getElementById('b2').classList.add('on', 'ok');
+    note.textContent = NOTE_TEXT[1];
+    mainBtn.textContent = LABELS[1];
+    sfx('ok');
+  } else {
+    document.getElementById('b3').classList.add('on');
+    note.textContent = NOTE_TEXT[2];
+    note.className = 'note good';
+    sfx('win');
+    mainBtn.textContent = LABELS[2];
+  }
+}
+mainBtn.addEventListener('click', function () {
+  if (stage < 3) { setStage(stage + 1); }
+  else { sfx('tap'); deck('next'); }
+});
+</script>
+</body>
+</html>
