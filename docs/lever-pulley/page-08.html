@@ -96,58 +96,87 @@ svg { display: block; max-width: 100%; }
         <rect x="150" y="40" width="560" height="14" rx="7" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
         <text x="150" y="30" font-size="15" fill="var(--ink-3)">横梁（定滑轮挂在这里）</text>
         <g id="d1">
-          <circle cx="430" cy="120" r="42" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3.5"/>
-          <line class="seg" x1="430" y1="380" x2="430" y2="162" />
-          <path d="M430 380 L430 120 L474 120 L474 268" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
-          <rect class="lift" x="398" y="380" width="64" height="66" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
-          <text class="lift" x="430" y="420" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink-2)">G物＝400N</text>
-          <text x="500" y="290" font-size="15" font-weight="700" fill="var(--accent)">F</text>
-          <text x="392" y="470" font-size="14" fill="var(--ink-3)">方案一 · 一个定滑轮</text>
+          <line class="seg" x1="388" y1="330" x2="388" y2="120"/>
+          <path d="M388 330 L388 120 A42 42 0 0 1 472 120 L472 316" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+          <polygon points="472,332 464,316 480,316" fill="var(--accent)"/>
+          <text x="484" y="326" font-size="15" font-weight="700" fill="var(--accent)">F＝400N</text>
+          <line x1="430" y1="60" x2="430" y2="118" stroke="var(--ink)" stroke-width="3"/>
+          <circle cx="430" cy="120" r="42" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="4"/>
+          <circle cx="430" cy="120" r="8" fill="var(--accent)"/>
+          <rect x="356" y="330" width="64" height="64" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <text x="388" y="364" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink-2)">G物</text>
+          <text x="388" y="382" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink-2)">400N</text>
+          <text x="600" y="130" font-size="14" fill="var(--ink-3)">定滑轮：轴固定</text>
+          <text x="392" y="470" font-size="14" fill="var(--ink-3)">方案一 · 一只定滑轮：只转向，不省力</text>
         </g>
         <g id="d2" visibility="hidden">
-          <circle cx="600" cy="120" r="34" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3.5"/>
-          <circle cx="430" cy="266" r="38" fill="var(--accent)" fill-opacity="0.22" stroke="var(--accent)" stroke-width="3.5"/>
-          <line class="seg" x1="394" y1="54" x2="394" y2="234"/>
-          <line class="seg" x1="466" y1="234" x2="466" y2="120"/>
-          <path d="M394 54 L394 234 L600 234 L600 120 L600 120" fill="none" stroke="var(--ink)" stroke-width="3.5" opacity="0.55"/>
-          <path d="M634 120 L634 268" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
-          <circle cx="600" cy="120" r="5" fill="var(--accent)"/>
-          <rect class="lift" x="398" y="304" width="64" height="66" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
-          <text class="lift" x="430" y="344" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink-2)">G物＝400N</text>
-          <text x="640" y="286" font-size="15" font-weight="700" fill="var(--accent)">F</text>
+          <line class="seg" x1="360" y1="60" x2="360" y2="280"/>
+          <line class="seg" x1="440" y1="280" x2="440" y2="110"/>
+          <path d="M360 60 L360 280 A40 40 0 0 0 440 280 L440 110 A28 28 0 0 1 496 110 L496 320" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+          <polygon points="496,334 488,316 504,316" fill="var(--accent)"/>
+          <text x="506" y="324" font-size="15" font-weight="700" fill="var(--accent)">F</text>
+          <line x1="468" y1="60" x2="468" y2="110" stroke="var(--ink)" stroke-width="3"/>
+          <circle cx="468" cy="110" r="28" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="4"/>
+          <circle cx="468" cy="110" r="7" fill="var(--accent)"/>
+          <circle cx="400" cy="280" r="40" fill="var(--accent)" fill-opacity="0.18" stroke="var(--accent)" stroke-width="4"/>
+          <circle cx="400" cy="280" r="8" fill="var(--accent)"/>
+          <line x1="400" y1="280" x2="400" y2="326" stroke="var(--ink)" stroke-width="3"/>
+          <rect x="368" y="326" width="64" height="64" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <text x="400" y="362" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink-2)">G物</text>
+          <text x="400" y="380" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink-2)">400N</text>
+          <text x="400" y="222" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">动滑轮 G动＝40N</text>
+          <text x="360" y="452" font-size="14" fill="var(--ink-3)">黄轮＝动滑轮（跟货一起动）· 白轮＝定滑轮</text>
           <text x="392" y="470" font-size="14" fill="var(--ink-3)">方案二 · 1 定 1 动</text>
         </g>
         <g id="d3" visibility="hidden">
-          <circle cx="360" cy="120" r="34" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3.5"/>
-          <circle cx="560" cy="120" r="34" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3.5"/>
-          <circle cx="460" cy="266" r="38" fill="var(--accent)" fill-opacity="0.22" stroke="var(--accent)" stroke-width="3.5"/>
-          <line class="seg" x1="460" y1="228" x2="460" y2="158"/>
-          <line class="seg" x1="424" y1="238" x2="424" y2="120"/>
-          <line class="seg" x1="496" y1="238" x2="496" y2="120"/>
-          <path d="M460 228 L460 158 L360 158 L360 120 M424 238 L424 120 M496 238 L496 120 L560 120 L560 168" fill="none" stroke="var(--ink)" stroke-width="3.5" opacity="0.55"/>
-          <path d="M560 168 L560 268" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
-          <circle cx="460" cy="228" r="5" fill="var(--accent)"/>
-          <rect class="lift" x="428" y="304" width="64" height="66" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
-          <text class="lift" x="460" y="344" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink-2)">G物＝400N</text>
-          <text x="566" y="286" font-size="15" font-weight="700" fill="var(--accent)">F</text>
-          <text x="392" y="470" font-size="14" fill="var(--ink-3)">方案三 · 2 定 1 动</text>
+          <line class="seg" x1="430" y1="236" x2="430" y2="64"/>
+          <line class="seg" x1="390" y1="60" x2="390" y2="280"/>
+          <line class="seg" x1="470" y1="280" x2="470" y2="112"/>
+          <path d="M430 236 L430 64 M390 60 L390 280 A40 40 0 0 0 470 280 L470 112 A26 26 0 0 1 522 112 L522 320" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+          <polygon points="522,334 514,316 530,316" fill="var(--accent)"/>
+          <text x="532" y="324" font-size="15" font-weight="700" fill="var(--accent)">F</text>
+          <circle cx="430" cy="60" r="5" fill="var(--accent)"/>
+          <circle cx="496" cy="112" r="26" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="4"/>
+          <circle cx="496" cy="112" r="7" fill="var(--accent)"/>
+          <line x1="496" y1="60" x2="496" y2="112" stroke="var(--ink)" stroke-width="3"/>
+          <circle cx="430" cy="280" r="40" fill="var(--accent)" fill-opacity="0.18" stroke="var(--accent)" stroke-width="4"/>
+          <circle cx="430" cy="280" r="8" fill="var(--accent)"/>
+          <circle cx="430" cy="240" r="6" fill="var(--accent)"/>
+          <line x1="430" y1="280" x2="430" y2="326" stroke="var(--ink)" stroke-width="3"/>
+          <rect x="398" y="326" width="64" height="64" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <text x="430" y="362" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink-2)">G物</text>
+          <text x="430" y="380" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink-2)">400N</text>
+          <text x="340" y="222" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">动滑轮 G动＝40N</text>
+          <text x="392" y="470" font-size="14" fill="var(--ink-3)">方案三 · 2 定 1 动：绳端拴在动滑轮吊钩上</text>
         </g>
         <g id="d4" visibility="hidden">
-          <circle cx="540" cy="120" r="34" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="3.5"/>
-          <rect x="392" y="240" width="140" height="64" rx="14" fill="var(--accent)" fill-opacity="0.22" stroke="var(--accent)" stroke-width="3.5"/>
-          <text x="462" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="var(--accent)">动滑轮组</text>
-          <line class="seg" x1="398" y1="54" x2="398" y2="240"/>
-          <line class="seg" x1="446" y1="240" x2="446" y2="120"/>
-          <line class="seg" x1="478" y1="120" x2="478" y2="240"/>
-          <line class="seg" x1="526" y1="240" x2="526" y2="120"/>
-          <path d="M398 54 L398 240 M446 240 L446 120 L478 120 L478 240 M526 240 L526 120 L540 120 L540 168" fill="none" stroke="var(--ink)" stroke-width="3.5" opacity="0.55"/>
-          <path d="M540 168 L540 268" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
-          <rect class="lift" x="428" y="310" width="68" height="66" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
-          <text class="lift" x="462" y="350" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink-2)">G物＝400N</text>
-          <text x="546" y="286" font-size="15" font-weight="700" fill="var(--accent)">F</text>
+          <line class="seg" x1="358" y1="60" x2="358" y2="280"/>
+          <line class="seg" x1="422" y1="280" x2="422" y2="96"/>
+          <line class="seg" x1="474" y1="96" x2="474" y2="280"/>
+          <line class="seg" x1="538" y1="280" x2="538" y2="96"/>
+          <path d="M358 60 L358 280 A32 32 0 0 0 422 280 L422 96 A26 26 0 0 1 474 96 L474 280 A32 32 0 0 0 538 280 L538 96 A26 26 0 0 1 590 96 L590 320" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+          <polygon points="590,334 582,316 598,316" fill="var(--accent)"/>
+          <text x="600" y="324" font-size="15" font-weight="700" fill="var(--accent)">F</text>
+          <circle cx="448" cy="96" r="26" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="4"/>
+          <circle cx="448" cy="96" r="7" fill="var(--accent)"/>
+          <line x1="448" y1="60" x2="448" y2="96" stroke="var(--ink)" stroke-width="3"/>
+          <circle cx="564" cy="96" r="26" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="4"/>
+          <circle cx="564" cy="96" r="7" fill="var(--accent)"/>
+          <line x1="564" y1="60" x2="564" y2="96" stroke="var(--ink)" stroke-width="3"/>
+          <circle cx="390" cy="280" r="32" fill="var(--accent)" fill-opacity="0.18" stroke="var(--accent)" stroke-width="4"/>
+          <circle cx="390" cy="280" r="7" fill="var(--accent)"/>
+          <circle cx="506" cy="280" r="32" fill="var(--accent)" fill-opacity="0.18" stroke="var(--accent)" stroke-width="4"/>
+          <circle cx="506" cy="280" r="7" fill="var(--accent)"/>
+          <line x1="390" y1="312" x2="390" y2="340" stroke="var(--ink)" stroke-width="3"/>
+          <line x1="506" y1="312" x2="506" y2="340" stroke="var(--ink)" stroke-width="3"/>
+          <line x1="390" y1="340" x2="506" y2="340" stroke="var(--ink)" stroke-width="3"/>
+          <rect x="416" y="340" width="64" height="64" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+          <text x="448" y="376" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink-2)">G物</text>
+          <text x="448" y="394" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink-2)">400N</text>
+          <text x="448" y="222" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">动滑轮组 G动＝40N</text>
           <text x="392" y="470" font-size="14" fill="var(--ink-3)">方案四 · 2 定 2 动（动滑轮组）</text>
         </g>
-      </svg>
+        </svg>
     </figure>
     <div class="panel in" style="--i:3">
       <div class="ncard card">

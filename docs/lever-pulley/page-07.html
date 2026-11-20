@@ -68,11 +68,11 @@ svg { display: block; max-width: 100%; }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
 /* ========== 三、本页样式：只有这一段每页不同 ========== */
 [hidden] { display: none !important; }
-.panels { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; flex: 1; min-height: 0; }
+.panels { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(0, 1fr); gap: 1.5rem; flex: 1; min-height: 0; }
 .panel { background: var(--surface); border-radius: 1.2rem; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.5rem;
-  opacity: 0.3; transition: opacity 0.4s; }
+  min-height: 0; overflow: hidden; opacity: 0.3; transition: opacity 0.4s; }
 .panel.on { opacity: 1; }
-.panel svg { flex: 1; min-height: 0; max-height: 100%; width: auto; max-width: 100%; margin: 0 auto; }
+.panel svg { width: 100%; height: 100%; min-height: 0; }   /* 撑满面板盒并按 viewBox 等比留白，绝不外溢盖住按钮 */
 .panel h3 { display: flex; align-items: baseline; gap: 0.6em; }
 .panel h3 .num { font-size: 0.9rem; color: var(--accent); }
 .panel .say { font-size: max(0.8rem, 14px); color: var(--ink-3); }
@@ -98,20 +98,19 @@ svg { display: block; max-width: 100%; }
       <div class="panel in" style="--i:3" id="pFixed">
         <h3>定滑轮 <span class="num">轴固定不动 · 等臂杠杆</span></h3>
         <svg viewBox="0 0 320 250" role="img" aria-label="定滑轮：两臂都是半径">
-          <line x1="60" y1="34" x2="260" y2="34" stroke="var(--ink)" stroke-width="4"/>
-          <line x1="116" y1="34" x2="116" y2="92" stroke="var(--ink-3)" stroke-width="2"/>
-          <line x1="204" y1="34" x2="204" y2="92" stroke="var(--ink-3)" stroke-width="2"/>
-          <circle cx="160" cy="92" r="44" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="4"/>
-          <circle cx="160" cy="92" r="6" fill="var(--accent)"/>
-          <line x1="116" y1="90" x2="116" y2="216" stroke="var(--ink)" stroke-width="3"/>
-          <line x1="204" y1="90" x2="204" y2="216" stroke="var(--ink)" stroke-width="3"/>
-          <rect x="94" y="216" width="44" height="30" rx="6" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
-          <text x="116" y="264" text-anchor="middle" font-size="14" fill="var(--ink-2)">G＝400N</text>
-          <polygon points="204,150 195,168 213,168" fill="var(--accent)"/>
-          <text x="216" y="166" font-size="15" font-weight="800" fill="var(--accent)">F＝400N</text>
+          <line x1="60" y1="30" x2="260" y2="30" stroke="var(--ink)" stroke-width="4"/>
+          <line x1="160" y1="30" x2="160" y2="92" stroke="var(--ink)" stroke-width="3"/>
+          <path d="M120 196 L120 92 A40 40 0 0 1 200 92 L200 146" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+          <polygon points="200,160 192,146 208,146" fill="var(--accent)"/>
+          <text x="212" y="158" font-size="14" font-weight="800" fill="var(--accent)">F＝400N</text>
+          <circle cx="160" cy="92" r="40" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="4"/>
+          <circle cx="160" cy="92" r="7" fill="var(--accent)"/>
+          <rect x="98" y="196" width="44" height="40" rx="6" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
+          <text x="120" y="218" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-2)">G物</text>
+          <text x="120" y="232" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-2)">400N</text>
           <g id="fxR1" opacity="0">
-            <line x1="116" y1="92" x2="204" y2="92" stroke="var(--accent)" stroke-width="3" stroke-dasharray="7 6"/>
-            <text x="160" y="76" text-anchor="middle" font-size="15" font-weight="800" fill="var(--accent)">L₁＝R　L₂＝R</text>
+            <line x1="120" y1="92" x2="200" y2="92" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="6 5"/>
+            <text x="160" y="68" text-anchor="middle" font-size="13" font-weight="800" fill="var(--accent)">L₁＝L₂＝R</text>
           </g>
         </svg>
         <p class="say" id="say1">脾气：只帮你改变用力的方向，一点不省力。</p>
@@ -119,20 +118,20 @@ svg { display: block; max-width: 100%; }
       <div class="panel in" style="--i:4" id="pMove">
         <h3>动滑轮 <span class="num">轴跟着货走 · 动力臂＝2R</span></h3>
         <svg viewBox="0 0 320 250" role="img" aria-label="动滑轮：动力臂是直径">
-          <line x1="60" y1="34" x2="260" y2="34" stroke="var(--ink)" stroke-width="4"/>
-          <line x1="116" y1="34" x2="116" y2="122" stroke="var(--ink)" stroke-width="3"/>
-          <line x1="204" y1="34" x2="204" y2="122" stroke="var(--ink)" stroke-width="3"/>
-          <circle cx="160" cy="122" r="44" fill="var(--accent)" fill-opacity="0.22" stroke="var(--accent)" stroke-width="4"/>
-          <circle cx="160" cy="122" r="6" fill="var(--accent)"/>
-          <line x1="160" y1="128" x2="160" y2="196" stroke="var(--ink)" stroke-width="3"/>
-          <rect x="138" y="196" width="44" height="30" rx="6" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
-          <text x="160" y="244" text-anchor="middle" font-size="14" fill="var(--ink-2)">G＝400N</text>
-          <line x1="204" y1="108" x2="204" y2="58" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/>
-          <polygon points="204,44 194,62 214,62" fill="var(--accent)"/>
-          <text x="218" y="66" font-size="15" font-weight="800" fill="var(--accent)">F＝200N</text>
+          <line x1="60" y1="30" x2="260" y2="30" stroke="var(--ink)" stroke-width="4"/>
+          <path d="M120 34 L120 122 A40 40 0 0 0 200 122 L200 44" fill="none" stroke="var(--ink)" stroke-width="3.5"/>
+          <polygon points="200,30 192,44 208,44" fill="var(--accent)"/>
+          <text x="212" y="46" font-size="14" font-weight="800" fill="var(--accent)">F＝200N</text>
+          <circle cx="120" cy="30" r="5" fill="var(--accent)"/>
+          <circle cx="160" cy="122" r="40" fill="var(--accent)" fill-opacity="0.18" stroke="var(--accent)" stroke-width="4"/>
+          <circle cx="160" cy="122" r="7" fill="var(--accent)"/>
+          <line x1="160" y1="129" x2="160" y2="170" stroke="var(--ink)" stroke-width="3"/>
+          <rect x="138" y="170" width="44" height="40" rx="6" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2.5"/>
+          <text x="160" y="192" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-2)">G物</text>
+          <text x="160" y="206" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-2)">400N</text>
           <g id="fxR2" opacity="0">
-            <line x1="116" y1="122" x2="204" y2="122" stroke="var(--accent)" stroke-width="3" stroke-dasharray="7 6"/>
-            <text x="160" y="106" text-anchor="middle" font-size="15" font-weight="800" fill="var(--accent)">动力臂＝2R　阻力臂＝R</text>
+            <line x1="120" y1="122" x2="200" y2="122" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="6 5"/>
+            <text x="160" y="100" text-anchor="middle" font-size="13" font-weight="800" fill="var(--accent)">动力臂＝2R</text>
           </g>
         </svg>
         <p class="say" id="say2">脾气：省一半力，代价是绳子要多拉一倍的路。</p>
